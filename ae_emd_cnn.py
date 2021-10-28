@@ -46,7 +46,7 @@ class ae_EMD_CNN:
             
             return data_values
         
-        current_directory='/ecoderemdvol/ae'
+        current_directory='/ecoderemdvol/q_ae'
         
         #Take dataset PASSED from previous Autoencoder Training
         csv_directory=os.path.join(test_ae_directory,'8x8_c8_S2_tele')
@@ -151,34 +151,31 @@ class ae_EMD_CNN:
         #Number of Conv2D Layers
         for i in range(1,num_conv_2d+1):
             ind=str(i)
-            x = Conv2D(num_filt, kernel_size, strides=(1, 1), name='conv2d_'+ind, padding='same', kernel_regularizer=l1_l2(l1=0,l2=1e-4))(x)
-            x = BatchNormalization(name='batchnorm_'+ind)(x)
-            x = Activation('relu', name='relu_'+ind)(x)
-
+            x = QConv2D(num_filt, kernel_size, strides=(1, 1), kernel_quantizer="stochastic_ternary",bias_quantizer="ternary",name='conv2d_'+ind, padding='same', kernel_regularizer=l1_l2(l1=0,l2=1e-4))(x)
+            x = QBatchNormalization(name='batchnorm_'+ind)(x)
+            x = QActivation('relu', name='relu_'+ind)(x)
+                
         x = Flatten(name='flatten')(x)
-
+            
         #Number of Dense Layers
         for i in range(1,num_dens_layers+1):
             ind=str(i)
             jind=str(i+num_conv_2d)
-            x = Dense(num_dens_neurons, name='dense_'+ind, kernel_regularizer=l1_l2(l1=0,l2=1e-4))(x)
-            x = BatchNormalization(name='batchnorm'+jind)(x)
-            x = Activation('relu', name='relu_'+jind)(x)
-
-        output = Dense(1, name='output')(x)
+            x = QDense(units=num_dens_neurons, kernel_quantizer=quantized_bits(3),bias_quantizer=quantized_bits(3),kernel_regularizer=l1_l2(l1=0,l2=1e-4), name='dense_'+ind)(x)
+            x = QBatchNormalization(name='batchnorm'+jind)(x)
+            x = QActivation('relu', name='relu_'+jind)(x)
+        
+        x = QActivation("quantized_bits(20, 5)")(x)
+                
+        output = QDense(1, name='output')(x)
         model = Model(inputs=[input1, input2], outputs=output, name='base_model')
         model.summary()
         
-        # make a model that enforces the symmetry of the EMD function by averging the outputs for swapped inputs
-        output = Average(name='average')([model((input1, input2)), model((input2, input1))])
-        sym_model = Model(inputs=[input1, input2], outputs=output, name='sym_model')
-        sym_model.summary()
-        
-        final_directory=os.path.join(current_directory,r'ae_emd_models')
+        final_directory=os.path.join(current_directory,r'q_ae_emd_models')
         if not os.path.exists(final_directory):
                 os.makedirs(final_directory)
-        callbacks = [ModelCheckpoint('/ecoderemdvol/ae/ae_emd_models/'+str(num_filt)+str(kernel_size)+str(num_dens_neurons)+str(num_dens_layers)+str(num_conv_2d)+str(num_epochs)+Loss+'best.h5', monitor='val_loss', verbose=1, save_best_only=True),
-                        ModelCheckpoint('/ecoderemdvol/ae/ae_emd_models/'+str(num_filt)+str(kernel_size)+str(num_dens_neurons)+str(num_dens_layers)+str(num_conv_2d)+str(num_epochs)+Loss+'last.h5', monitor='val_loss', verbose=1, save_last_only=True),
+        callbacks = [ModelCheckpoint('/ecoderemdvol/ae/q_ae_emd_models/'+str(num_filt)+str(kernel_size)+str(num_dens_neurons)+str(num_dens_layers)+str(num_conv_2d)+str(num_epochs)+Loss+'best.h5', monitor='val_loss', verbose=1, save_best_only=True),
+                        ModelCheckpoint('/ecoderemdvol/q_ae/q_ae_emd_models/'+str(num_filt)+str(kernel_size)+str(num_dens_neurons)+str(num_dens_layers)+str(num_conv_2d)+str(num_epochs)+Loss+'last.h5', monitor='val_loss', verbose=1, save_last_only=True),
                     ]
 
         sym_model.compile(optimizer='adam', loss=Loss, metrics=['mse', 'mae', 'mape', 'msle'])
@@ -188,7 +185,7 @@ class ae_EMD_CNN:
         
         #Making directory for graphs
 
-        img_directory=os.path.join(current_directory,r'AE EMD Plots')
+        img_directory=os.path.join(current_directory,r'Q AE EMD Plots')
         if not os.path.exists(img_directory):
             os.makedirs(img_directory)
 
