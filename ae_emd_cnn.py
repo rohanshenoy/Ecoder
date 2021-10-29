@@ -171,6 +171,11 @@ class ae_EMD_CNN:
         model = Model(inputs=[input1, input2], outputs=output, name='base_model')
         model.summary()
         
+        # make a model that enforces the symmetry of the EMD function by averging the outputs for swapped inputs
+        output = Average(name='average')([model((input1, input2)), model((input2, input1))])
+        sym_model = Model(inputs=[input1, input2], outputs=output, name='sym_model')
+        sym_model.summary()
+        
         final_directory=os.path.join(current_directory,r'q_ae_emd_models')
         if not os.path.exists(final_directory):
                 os.makedirs(final_directory)
@@ -182,12 +187,6 @@ class ae_EMD_CNN:
         history = sym_model.fit((X1_train, X2_train), y_train, 
                             validation_data=((X1_val, X2_val), y_val),
                             epochs=num_epochs, verbose=1, batch_size=32, callbacks=callbacks)
-        
-        # make a model that enforces the symmetry of the EMD function by averging the outputs for swapped inputs
-        output = Average(name='average')([model((input1, input2)), model((input2, input1))])
-        sym_model = Model(inputs=[input1, input2], outputs=output, name='sym_model')
-        sym_model.summary()
-        
         #Making directory for graphs
 
         img_directory=os.path.join(current_directory,r'Q AE EMD Plots')
