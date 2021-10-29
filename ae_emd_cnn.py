@@ -183,6 +183,11 @@ class ae_EMD_CNN:
                             validation_data=((X1_val, X2_val), y_val),
                             epochs=num_epochs, verbose=1, batch_size=32, callbacks=callbacks)
         
+        # make a model that enforces the symmetry of the EMD function by averging the outputs for swapped inputs
+        output = Average(name='average')([model((input1, input2)), model((input2, input1))])
+        sym_model = Model(inputs=[input1, input2], outputs=output, name='sym_model')
+        sym_model.summary()
+        
         #Making directory for graphs
 
         img_directory=os.path.join(current_directory,r'Q AE EMD Plots')
