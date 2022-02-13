@@ -39,12 +39,12 @@ class ae_EMD_CNN:
         
         def load_data(inputFile):
             
-            data=pd.read_csv(inputFile, dtype=np.float64)
+            data=pd.read_csv(inputFile,usecols=[*range(0,48)])
             data_values=data.values
             
             return data_values
         
-        current_directory=os.getcwd()
+        current_directory='/ecoderemdvol/22EMD/ae'
         
         #Take dataset PASSED from previous Autoencoder Training
         csv_directory=os.path.join(test_ae_directory,'8x8_c8_S2_tele')
