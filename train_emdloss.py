@@ -46,7 +46,7 @@ def main(args):
     if(not args.aeEMD):
         data=load_data(args)
     
-    current_directory=os.getcwd()
+    current_directory='ecoderemdvol/22EMD'
 
     #Data to track the performance of various EMD_CNN models
 
@@ -85,7 +85,7 @@ def main(args):
         #Each model per set of hyperparamters is trained thrice to avoid bad initialitazion discarding a good model. (We vary num_epochs by 1 to differentiate between these 3 trainings)
         
         for Loss in loss_list:
-            for i in [0,1,2]:
+            for i in [0,1,2,3]:
                 mean ,sd=0, 0
                 if(args.aeEMD):
                     mean,sd=ae_EMD_CNN.ittrain(args.inputFile,num_filt,kernel_size, num_dens_neurons, num_dens_layers, num_conv_2d,num_epochs+i,Loss)
