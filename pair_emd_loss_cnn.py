@@ -133,7 +133,7 @@ class pair_EMD_CNN:
         sym_model.compile(optimizer='adam', loss=Loss, metrics=['mse', 'mae', 'mape', 'msle'])
         history = sym_model.fit((X1_train, X2_train), y_train, 
                             validation_data=((X1_val, X2_val), y_val),
-                            epochs=num_epochs, verbose=1, batch_size=32, callbacks=callbacks)
+                            epochs=num_epochs, verbose=1, batch_size=128, callbacks=callbacks)
         
         #Making directory for graphs
         
@@ -157,8 +157,8 @@ class pair_EMD_CNN:
         plt.close()
         y_val_preds = sym_model.predict((X1_val, X2_val))
         fig=plt.figure()
-        fig=plt.hist(y_val, alpha=0.5, bins=np.arange(0, 7.5, 0.01), label='TrueEMD')
-        fig=plt.hist(y_val_preds, alpha=0.5, bins=np.arange(0, 7.5, 0.01), label='EMDCNN')
+        fig=plt.hist(y_val, alpha=0.5, bins=np.arange(0, 15, 0.01), label='TrueEMD')
+        fig=plt.hist(y_val_preds, alpha=0.5, bins=np.arange(0, 15, 0.01), label='EMDCNN')
         fig=plt.xlabel('EMD [GeV]')
         fig=plt.ylabel('Samples')
         fig=plt.legend()
@@ -181,8 +181,8 @@ class pair_EMD_CNN:
         
         plt.close()
         fig, ax = plt.subplots(figsize =(5, 5)) 
-        x_bins = np.arange(0, 7.5, 0.01)
-        y_bins = np.arange(0, 7.5, 0.01)
+        x_bins = np.arange(0, 15, 0.01)
+        y_bins = np.arange(0, 15, 0.01)
         plt.hist2d(y_val.flatten(), y_val_preds.flatten(), bins=[x_bins,y_bins])
         plt.plot([0, 15], [0, 15], color='gray', alpha=0.5)
         ax.set_xlabel('True EMD [GeV]')
