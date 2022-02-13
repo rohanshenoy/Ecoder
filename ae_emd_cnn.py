@@ -182,7 +182,7 @@ class ae_EMD_CNN:
         sym_model.compile(optimizer='adam', loss=Loss, metrics=['mse', 'mae', 'mape', 'msle'])
         history = sym_model.fit((X1_train, X2_train), y_train, 
                             validation_data=((X1_val, X2_val), y_val),
-                            epochs=num_epochs, verbose=1, batch_size=32, callbacks=callbacks)
+                            epochs=num_epochs, verbose=1, batch_size=128, callbacks=callbacks)
         
         #Making directory for graphs
 
