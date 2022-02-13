@@ -178,6 +178,10 @@ class ae_EMD_CNN:
         callbacks = [ModelCheckpoint('/ecoderemdvol/22EMD/ae/ae_emd_models/'+str(num_filt)+str(kernel_size)+str(num_dens_neurons)+str(num_dens_layers)+str(num_conv_2d)+str(num_epochs)+Loss+'best.h5', monitor='val_loss', verbose=1, save_best_only=True),
                      ModelCheckpoint('/ecoderemdvol/22EMD/ae/ae_emd_models/'+str(num_filt)+str(kernel_size)+str(num_dens_neurons)+str(num_dens_layers)+str(num_conv_2d)+str(num_epochs)+Loss+'last.h5', monitor='val_loss', verbose=1, save_last_only=True),
                     ]
+        
+        new_lr= 4e-3
+        
+        tf.keras.optimizers.Adam.lr.assign(new_lr)
 
         sym_model.compile(optimizer='adam', loss=Loss, metrics=['mse', 'mae', 'mape', 'msle'])
         history = sym_model.fit((X1_train, X2_train), y_train, 
