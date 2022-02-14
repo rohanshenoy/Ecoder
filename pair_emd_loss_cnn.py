@@ -20,6 +20,8 @@ from utils.wafer import plot_wafer as plotWafer
 
 from utils.metrics import emd
 
+import tensorflow as tf
+
 from tensorflow.keras.layers import Input, Dense, Flatten, Concatenate, BatchNormalization, Activation, Average, Conv2D
 from tensorflow.keras.models import Model
 from tensorflow.keras.regularizers import l1_l2
