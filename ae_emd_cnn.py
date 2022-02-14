@@ -182,8 +182,11 @@ class ae_EMD_CNN:
         callbacks = [ModelCheckpoint('/ecoderemdvol/ae/q_ae_emd_models/'+str(num_filt)+str(kernel_size)+str(num_dens_neurons)+str(num_dens_layers)+str(num_conv_2d)+str(num_epochs)+Loss+'best.h5', monitor='val_loss', verbose=1, save_best_only=True),
                         ModelCheckpoint('/ecoderemdvol/q_ae/q_ae_emd_models/'+str(num_filt)+str(kernel_size)+str(num_dens_neurons)+str(num_dens_layers)+str(num_conv_2d)+str(num_epochs)+Loss+'last.h5', monitor='val_loss', verbose=1, save_last_only=True),
                     ]
+        
+        opt = tf.keras.optimizers.Adam(learning_rate=4e-3)
 
-        sym_model.compile(optimizer='adam', loss=Loss, metrics=['mse', 'mae', 'mape', 'msle'])
+        sym_model.compile(optimizer=opt, loss=Loss, metrics=['mse', 'mae', 'mape', 'msle'])
+        
         history = sym_model.fit((X1_train, X2_train), y_train, 
                             validation_data=((X1_val, X2_val), y_val),
                             epochs=num_epochs, verbose=1, batch_size=32, callbacks=callbacks)
