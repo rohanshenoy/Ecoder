@@ -19,6 +19,7 @@ from get_flops import get_flops_from_model
 
 from utils.logger import _logger
 from utils.plot import plot_loss, plot_hist, visualize_displays, plot_profile, overlay_plots
+from emd_v_eta import plot_eta
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-o',"--odir", type=str, default='CNN/PU/', dest="odir",
@@ -114,6 +115,9 @@ def load_data(args):
     # charge data headers of 48 Input Trigger Cells (TC) 
     CALQ_COLS = ['CALQ_%i'%c for c in range(0, 48)]
     
+    #Keep track of phys data
+    COORD_COLS=['tc_eta','tc_phi']
+    
     def mask_data(data,args):
         # mask rows where occupancy is zero
         mask_occupancy = (data[CALQ_COLS].astype('float64').sum(axis=1) != 0)
@@ -133,14 +137,17 @@ def load_data(args):
     
     if os.path.isdir(args.inputFile):
         df_arr = []
+        phy_arr=[]
         for infile in os.listdir(args.inputFile):
             if os.path.isdir(args.inputFile+infile): continue
             infile = os.path.join(args.inputFile,infile)
             if args.noHeader:
-                df_arr.append(pd.read_csv(infile, dtype=np.float64, header=0, nrows = args.nrowsPerFile, usecols=[*range(1,49)], names=CALQ_COLS))
+                df_arr.append(pd.read_csv(infile, dtype=np.float64, header=0, nrows = args.nrowsPerFile, usecols=[*range(0,48)], names=CALQ_COLS))
+                phy_arr.append(pd.read_csv(infile, dtype=np.float64, header=0, nrows = args.nrowsPerFile, usecols=[*range(55,57)], names=COORD_COLS))
             else:
                 df_arr.append(pd.read_csv(infile, nrows=args.nrowsPerFile))
         data = pd.concat(df_arr)
+        phys = pd.concat(phy_arr)
     else:
         data = pd.read_csv(args.inputFile, nrows=args.nrowsPerFile)
     data = mask_data(data,args)
@@ -157,7 +164,9 @@ def load_data(args):
             _logger.warning('No SimEnergyFraction or SimEnergyTotal or EventSimEnergyTotal arrays in input data')
 
     data = data[CALQ_COLS].astype('float64')
+    phys = phys[COORD_COLS]
     data_values = data.values
+    phys_values = phys.values
     _logger.info('Input data shape')
     print(data.shape)
     data.describe()
@@ -176,7 +185,7 @@ def load_data(args):
         print(doubled_data.shape)
         data_values = doubled_data
 
-    return data_values
+    return (data_values,phys_values)
 
 def build_model(args):
     # import network architecture and loss function
@@ -536,7 +545,7 @@ def main(args):
             exit(0)
 
     # load data
-    data_values = load_data(args)
+    data_values,phys_values = load_data(args)
         
     # measure TC occupancy
     occupancy_all = np.count_nonzero(data_values,axis=1) # measure non-zero TCs (should be all)
@@ -619,6 +628,11 @@ def main(args):
     # performance dictionary
     perf_dict={}
     
+    #Putting back physics columns below once training is done
+    Nphys = round(len(phys_values)*0.2)
+    phys_val_input = phys_values[:Nphys]
+    phys_val_input=phys_val_input
+    
     # train each model
     for model in models:
         model_name = model['name']
@@ -656,9 +670,9 @@ def main(args):
         val_max = maxdata[val_ind]
         val_sum = sumdata[val_ind]
         if args.occReweight:
-           train_weights = np.multiply(weights_maxQ[train_ind], weights_occ[train_ind])
+            train_weights = np.multiply(weights_maxQ[train_ind], weights_occ[train_ind])
         else:
-           train_weights = np.ones(len([train_input]))
+            train_weights = np.ones(len([train_input]))
 
         if args.maxVal>0:
             _logger.info('Clipping outputs')
@@ -714,10 +728,12 @@ def main(args):
             AEvol = m.pams['shape'][0]* m.pams['shape'][1] *  m.pams['shape'][2]
             np.savetxt("verify_input_ae.csv", input_Q[0:N_csv].reshape(N_csv,AEvol), delimiter=",",fmt='%.12f')
             np.savetxt("verify_input_ae_abs.csv", input_Q_abs[0:N_csv].reshape(N_csv,AEvol), delimiter=",",fmt='%.12f')
-            np.savetxt("verify_input_calQ.csv", input_calQ[0:N_csv].reshape(N_csv,48), delimiter=",",fmt='%.12f')
+            np.savetxt("verify_input_calQ.csv", np.hstack((input_calQ[0:N_csv].reshape(N_csv,48),phys_val_input)), delimiter=",",fmt='%.12f')
             np.savetxt("verify_output.csv",cnn_enQ[0:N_csv].reshape(N_csv,m.pams['encoded_dim']), delimiter=",",fmt='%.12f')
             np.savetxt("verify_decoded.csv",cnn_deQ[0:N_csv].reshape(N_csv,AEvol), delimiter=",",fmt='%.12f')
-            np.savetxt("verify_decoded_calQ.csv",output_calQ_fr[0:N_csv].reshape(N_csv,48), delimiter=",",fmt='%.12f')
+            np.savetxt("verify_decoded_calQ.csv",np.hstack((output_calQ_fr[0:N_csv].reshape(N_csv,48),phys_val_input)), delimiter=",",fmt='%.12f')
+            
+            #plot_eta(input_calQ[0:N_csv].reshape(N_csv,48), output_calQ_fr[0:N_csv].reshape(N_csv,48), phys_val_input)
 
         _logger.info('Renormalize inputs of AE for comparisons')
         occupancy_0MT = np.count_nonzero(input_calQ.reshape(len(input_Q),48),axis=1)
@@ -745,11 +761,12 @@ def main(args):
 
     # compare the relative performance of each model
     compare_models(models,perf_dict,eval_dict,args)
-
+    
     os.chdir(orig_dir)
+    
+    plot_eta(args.odir,args.models,phys_val_input)
 
 
 if __name__ == '__main__':
     args = parser.parse_args()
     main(args)
-
