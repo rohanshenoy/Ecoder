@@ -25,15 +25,14 @@ git clone https://github.com/google/qkeras
 
 ## Input data
 
-Get data from FNAL LPC:
+Get root data from FNAL LPC:
 ```
 mkdir data/
-scp -r cmslpc-sl7.fnal.gov:/uscms/home/kkwok/eos/ecoder/V11/ data/
+scp -r cmslpc-sl7.fnal.gov:/eos/uscms/store/user/lpchgcal/ConcentratorNtuples/L1THGCal_Ntuples/TTbar_v11/
 ```
 
-or from cernbox: https://cernbox.cern.ch/index.php/s/YpAWu24aw6EaBk7
+or you can find the csv files here: https://emdhgcalae.nrp-nautilus.io/HGCal22Data_signal_driven_ttbar_v11/
 
-Electron samples: (neLinks 2-5 with sim-Energy information) `/eos/uscms/store/user/dnoonan/AE_TrainingData/NewData/Skim/ele200PUData_TrainingData_SignalAllocation/`
 
 ## Training emd_loss approximation using CNNs
 
