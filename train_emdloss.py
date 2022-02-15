@@ -62,7 +62,9 @@ def main(args):
     loss_data=[]
 
     #List of lists of Hyperparamters <- currently initialized from previous training
-    hyp_list=[[32,5,256,1,3],
+    hyp_list=[[32,5,256,1,3]]
+              
+    """
               [32,5,32,1,4],
               [64,5,32,1,4],
               [128,5,32,1,4],
@@ -70,6 +72,7 @@ def main(args):
               [32,5,128,1,3],
               [128,3,256,1,4],
               [128,5,256,1,4]]
+    """
     
     loss_list=['huber_loss','msle','mse']
     
@@ -85,7 +88,7 @@ def main(args):
         #Each model per set of hyperparamters is trained thrice to avoid bad initialitazion discarding a good model. (We vary num_epochs by 1 to differentiate between these 3 trainings)
         
         for Loss in loss_list:
-            for i in [0,1,2,3]:
+            for i in [0,1,2,3,4]:
                 mean ,sd=0, 0
                 if(args.aeEMD):
                     mean,sd=ae_EMD_CNN.ittrain(args.inputFile,num_filt,kernel_size, num_dens_neurons, num_dens_layers, num_conv_2d,num_epochs+i,Loss)
