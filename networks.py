@@ -263,9 +263,10 @@ networks_by_name = [
          'CNN_kernel_size':[3],
          'CNN_strides':[(2,2)],
         },
-    },
-
-    {'name':'8x8_c8_S2_app_msle',
+    }
+]
+"""
+{'name':'8x8_c8_S2_app_msle',
          'label':'8x8_c[8]_S2(app_msle)',
      'arr_key':'8x8',
      'params':{
@@ -288,7 +289,7 @@ networks_by_name = [
          'CNN_strides':[(2,2)],
         },
     }
-]
+"""
 
 defaults = {'channels_first': False,
             'encoded_dim': 16,
