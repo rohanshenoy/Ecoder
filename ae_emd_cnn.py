@@ -48,7 +48,7 @@ class ae_EMD_CNN:
         
         #Take dataset PASSED from previous Autoencoder Training
         csv_directory=os.path.join(test_ae_directory,'8x8_c8_S2_tele')
-        input_loc=os.path.join(csv_directory,'verify_input_calQ.csv')
+        input_loc=os.path.join(csv_directory,'all_input_calQ.csv')
 
         q_input_data=load_data(input_loc)
 
@@ -58,7 +58,7 @@ class ae_EMD_CNN:
                      24, 25, 26, 27, 16, 17, 18, 19,  8,  9, 10, 11,  0,  1,  2,  3, 
                      59, 51, 43, 35, 58, 50, 42, 34, 57, 49, 41, 33, 56, 48, 40, 32]
 
-        output_loc=os.path.join(csv_directory,'verify_decoded_calQ.csv')
+        output_loc=os.path.join(csv_directory,'all_decoded_calQ.csv')
         ae_input_data=load_data(output_loc)
         print(ae_input_data.shape)
         
@@ -110,9 +110,11 @@ class ae_EMD_CNN:
         r = tf.gather(calA_443, arrange443, axis=1)
         r = tf.reshape(r, (-1, 4, 4, 3))
         calA_443=r
+        
+        #Split 70-30 to match pair_emd
 
-        train_indices = range(0, int(0.6*len(calQ)))
-        val_indices = range(int(0.6*len(calQ)), len(calQ))
+        train_indices = range(0, int(0.7*len(calQ)))
+        val_indices = range(int(0.7*len(calQ)), len(calQ))
 
         train_index=int(0.6*len(calQ))
 

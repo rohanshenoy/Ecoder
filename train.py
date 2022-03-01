@@ -51,8 +51,12 @@ parser.add_argument("--double", action='store_true', default = False,dest="doubl
                     help="test PU400 by combining PU200 events")
 parser.add_argument("--overrideInput", action='store_true', default = False,dest="overrideInput",
                     help="disable safety check on inputs")
+
+parser.add_argument("--saveAll", action='store_true', default = False, dest="saveAll",
+                    help="save training and validation wafers ")
+
 parser.add_argument("--nCSV", type=int, default = 1, dest="nCSV",
-                    help="n of validation events to write to csv")
+                    help="n of validation wafers to write to csv")
 parser.add_argument("--maxVal", type=int, default = -1, dest="maxVal",
                     help="clip outputs to maxVal")
 parser.add_argument("--AEonly", type=int, default=1, dest="AEonly",
@@ -628,7 +632,7 @@ def main(args):
     # performance dictionary
     perf_dict={}
     
-    #Putting back physics columns below once training is done
+    #Putting back validation wafer physics columns below once training is done
     Nphys = round(len(phys_values)*0.2)
     phys_val_input = phys_values[:Nphys]
     phys_val_input=phys_val_input
@@ -724,7 +728,7 @@ def main(args):
         isRTL = True
         if isRTL:
             _logger.info('Save CVS for RTL verification')
-            N_csv= (args.nCSV if args.nCSV>=0 else input_Q.shape[0]) # about 80k                                                                                                                          
+            N_csv= (args.nCSV if args.nCSV>=0 else input_Q.shape[0])                                                                                                                         
             AEvol = m.pams['shape'][0]* m.pams['shape'][1] *  m.pams['shape'][2]
             np.savetxt("verify_input_ae.csv", input_Q[0:N_csv].reshape(N_csv,AEvol), delimiter=",",fmt='%.12f')
             np.savetxt("verify_input_ae_abs.csv", input_Q_abs[0:N_csv].reshape(N_csv,AEvol), delimiter=",",fmt='%.12f')
@@ -733,7 +737,22 @@ def main(args):
             np.savetxt("verify_decoded.csv",cnn_deQ[0:N_csv].reshape(N_csv,AEvol), delimiter=",",fmt='%.12f')
             np.savetxt("verify_decoded_calQ.csv",np.hstack((output_calQ_fr[0:N_csv].reshape(N_csv,48),phys_val_input)), delimiter=",",fmt='%.12f')
             
-            #plot_eta(input_calQ[0:N_csv].reshape(N_csv,48), output_calQ_fr[0:N_csv].reshape(N_csv,48), phys_val_input)
+        if args.saveAll:
+            N_wafers = args.nrowsPerFile
+            _logger.info('Save all wafers, model %s'%model_name)
+            all_input_Q, all_cnn_deQ, all_cnn_enQ = m.predict(shaped_data)
+
+            all_input_calQ  = m.mapToCalQ(all_input_Q)   # shape = (N,48) in CALQ order
+            all_output_calQ_fr = m.mapToCalQ(all_cnn_deQ)# shape = (N,48) in CALQ order
+
+            _logger.info('Restore normalization')
+            all_input_Q_abs = np.array([all_input_Q[i]*(maxdata[i] if args.rescaleInputToMax else sumdata[i]) for i in range(0,len(all_input_Q))]) * 35.   # restore abs input in CALQ unit                              
+            all_input_calQ  = np.array([all_input_calQ[i]*(maxdata[i] if args.rescaleInputToMax else sumdata[i]) for i in range(0,len(all_input_calQ)) ])  # shape = (N,48) in CALQ order                                
+            all_output_calQ = unnormalize(all_output_calQ_fr.copy(), maxdata if args.rescaleOutputToMax else sumdata, rescaleOutputToMax=args.rescaleOutputToMax)
+            #Save  all wafers with physics columns       
+            np.savetxt("all_input_calQ.csv", np.hstack((all_input_calQ[0:N_wafers].reshape(N_wafers,48),phys_values)), delimiter=",",fmt='%.12f')
+            np.savetxt("all_decoded_calQ.csv",np.hstack((all_output_calQ_fr[0:N_wafers].reshape(N_wafers,48),phys_values)), delimiter=",",fmt='%.12f')
+                
 
         _logger.info('Renormalize inputs of AE for comparisons')
         occupancy_0MT = np.count_nonzero(input_calQ.reshape(len(input_Q),48),axis=1)
