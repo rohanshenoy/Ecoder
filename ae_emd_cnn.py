@@ -116,7 +116,7 @@ class ae_EMD_CNN:
         train_indices = range(0, int(0.7*len(calQ)))
         val_indices = range(int(0.7*len(calQ)), len(calQ))
 
-        train_index=int(0.6*len(calQ))
+        train_index=int(0.7*len(calQ))
 
         idx1_train = np.array([i for i in train_indices])
         idx2_train = np.array([j for j in train_indices])
