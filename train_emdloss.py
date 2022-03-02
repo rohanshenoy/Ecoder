@@ -74,7 +74,7 @@ def main(args):
               [128,5,256,1,4]]
     """
     
-    loss_list=['huber_loss''msle','mse']
+    loss_list=['huber_loss','msle','mse']
     
     num_epochs=args.num_epochs
     
