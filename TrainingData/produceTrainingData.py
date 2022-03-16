@@ -36,7 +36,7 @@ def loadTrainingData(inputRoot,
 
             df = ak.to_pandas(arrays[select_eLinks[N_eLinks]])
 
-            dfRemap = pd.read_csv(current_dir+'tcRemap.csv')
+            dfRemap = pd.read_csv('/home/jovyan/Ecoder/TrainingData/tcRemap.csv')
             df = df.reset_index().merge(dfRemap)
 
             df['ADCT'] = (df.tc_data* ((1./np.cosh(df.tc_eta))*2**12).astype(int)/2**12).astype(int)
@@ -56,7 +56,7 @@ def loadTrainingData(inputRoot,
                 dfTrainData['simenergy'] = df.groupby(['WaferEntryIdx'])[['tc_simenergy']].sum()
 
             #Mapping wafer_u,v to physical coordinates
-            dfEtaPhi=pd.read_csv(current_dir+'WaferEtaPhiMap.csv')
+            dfEtaPhi=pd.read_csv('/home/jovyan/Ecoder/TrainingData/WaferEtaPhiMap.csv')
             dfTrainData=dfTrainData.merge(dfEtaPhi, on=['layer','waferu','waferv'])
             dfTrainData.reset_index(drop=True,inplace=True)
             mergeTrainingData=pd.concat([mergeTrainingData,dfTrainData])
