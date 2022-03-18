@@ -47,7 +47,7 @@ def loadTrainingData(inputRoot,
             val = 'ADCT'
             if useADC:
                 val='tc_data'
-            dfTrainData = df.pivot(index='WaferEntryIdx',columns='tc_cell_train',values=val).fillna(0).astype(int)
+            dfTrainData = df.pivot_table(index='WaferEntryIdx',columns='tc_cell_train',values=val).fillna(0).astype(int)
             dfTrainData.columns = [f'CALQ_{i}' for i in range(48)]
 
             dfTrainData[['entry','zside','layer','waferu','waferv']] = df.groupby(['WaferEntryIdx'])[['entry','tc_zside','tc_layer','tc_waferu','tc_waferv']].mean()
