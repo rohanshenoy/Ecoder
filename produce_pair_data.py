@@ -16,7 +16,7 @@ def main(args):
     data_dir='/ecoderemdvol/HGCal22Data_signal_driven_ttbar_v11/nElinks_5/5Elinks_data.csv'
     CALQ_COLS = ['CALQ_%i'%c for c in range(0, 48)]
 
-    data =pd.read_csv(data_dir, dtype=np.float64, header=0, usecols=[*range(0,48)], names=CALQ_COLS, nrows=1000)
+    data =pd.read_csv(data_dir, dtype=np.float64, header=0, usecols=[*range(0,48)], names=CALQ_COLS, nrows=10000)
     data = data[CALQ_COLS].astype('float64')
     
     calQ = data.values
