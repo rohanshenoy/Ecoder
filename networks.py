@@ -251,7 +251,41 @@ networks_by_name = [
          'CNN_kernel_size':[3],
          'CNN_strides':[(2,2)],
         },
-    }
+    },
+         
+    {'name':'8x8_c8_S2_tpair_huber',
+         'label':'8x8_c[8]_S2(tpair_huber)',
+     'arr_key':'8x8',
+     'params':{
+         'shape':(8,8,1),
+         'loss':get_emd_loss("tpair_huber"),
+         'CNN_layer_nodes':[8],
+         'CNN_kernel_size':[3],
+         'CNN_strides':[(2,2)],
+        },
+    },
+    {'name':'8x8_c8_S2_tpair_mse',
+         'label':'8x8_c[8]_S2(tpair_mse)',
+     'arr_key':'8x8',
+     'params':{
+         'shape':(8,8,1),
+         'loss':get_emd_loss("tpair_mse"),
+         'CNN_layer_nodes':[8],
+         'CNN_kernel_size':[3],
+         'CNN_strides':[(2,2)],
+        },
+    },
+    {'name':'8x8_c8_S2_tpair_msle',
+         'label':'8x8_c[8]_S2(tpair_msle)',
+     'arr_key':'8x8',
+     'params':{
+         'shape':(8,8,1),
+         'loss':get_emd_loss("tpair_msle"),
+         'CNN_layer_nodes':[8],
+         'CNN_kernel_size':[3],
+         'CNN_strides':[(2,2)],
+        },
+    } 
 ]
 """
 ,
