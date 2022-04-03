@@ -170,7 +170,7 @@ networks_by_name = [
     },
     
     {'name':'8x8_c8_S2_tele',
-     'label':'telescope_loss',
+     'label':'8x8_c[8]_S2(tele)',
      'arr_key':'8x8',
      'params':{
          'shape':(8,8,1),
@@ -242,7 +242,7 @@ networks_by_name = [
     },
 
     {'name':'8x8_c8_S2_ae_mse',
-         'label':'emd_nn_loss',
+         'label':'8x8_c[8]_S2(ae_mse)',
      'arr_key':'8x8',
      'params':{
          'shape':(8,8,1),
