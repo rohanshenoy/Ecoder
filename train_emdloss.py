@@ -4,8 +4,6 @@ For training EMD_CNN with different hyperparameters, loss functions, datasets
 import pair_emd_loss_cnn #Script for training the CNN to approximate EMD using pairs of real inputs
 from ae_emd_cnn import ae_EMD_CNN #Approximating EMD using [input,AE] pairs
 from app_emd_cnn import app_EMD_CNN #EMD using both of the above datasets
-from thresh_pair_emd_cnn import thresh_pair_EMD_CNN
-
 import pandas as pd
 import os
 import numpy as np
@@ -21,9 +19,6 @@ parser.add_argument("--epochs", type=int, default = 64, dest="num_epochs",
                     help="number of epochs to train")
 parser.add_argument("--pairEMD", action='store_true', default = False,dest="pairEMD",
                     help="train EMD_CNN on pairs of real data")
-parser.add_argument("--thresh", action='store_true', default = False,dest="thresh_pairEMD",
-                    help="train EMD_CNN on pairs of real data with emd < 4")
-
 parser.add_argument("--aeEMD", action='store_true', default = False,dest="aeEMD",
                     help="train EMD_CNN on [input,AE(input)] data")
 parser.add_argument("--appEMD", action='store_true', default = False,dest="appEMD",
@@ -48,10 +43,10 @@ parser.add_argument("--saveEnergy", action='store_true', default = False,dest="s
 
 def main(args):
   
-    #if(not args.aeEMD):
-        #data=load_data(args)
+    if(not args.aeEMD):
+        data=load_data(args)
     
-    current_directory=os.getcwd()
+    current_directory='ecoderemdvol/22EMD'
 
     #Data to track the performance of various EMD_CNN models
 
@@ -67,7 +62,9 @@ def main(args):
     loss_data=[]
 
     #List of lists of Hyperparamters <- currently initialized from previous training
-    hyp_list=[[32,5,256,1,3],
+    hyp_list=[[32,5,256,1,3]]
+              
+    """
               [32,5,32,1,4],
               [64,5,32,1,4],
               [128,5,32,1,4],
@@ -75,8 +72,9 @@ def main(args):
               [32,5,128,1,3],
               [128,3,256,1,4],
               [128,5,256,1,4]]
+    """
     
-    loss_list=['huber_loss','msle','mse']
+    loss_list=['msle','mse']
     
     num_epochs=args.num_epochs
     
@@ -90,18 +88,15 @@ def main(args):
         #Each model per set of hyperparamters is trained thrice to avoid bad initialitazion discarding a good model. (We vary num_epochs by 1 to differentiate between these 3 trainings)
         
         for Loss in loss_list:
-            for i in [0,1,2]:
+            for i in [0,1,2,3,4]:
                 mean ,sd=0, 0
                 if(args.aeEMD):
                     mean,sd=ae_EMD_CNN.ittrain(args.inputFile,num_filt,kernel_size, num_dens_neurons, num_dens_layers, num_conv_2d,num_epochs+i,Loss)
                 elif(args.appEMD):
                     mean,sd=app_EMD_CNN.ittrain(data,args.inputFile,num_filt,kernel_size, num_dens_neurons, num_dens_layers, num_conv_2d,num_epochs+i,Loss)    
                 elif(args.pairEMD):
-                    if(args.thresh_pairEMD):
-                        mean,sd = thresh_pair_EMD_CNN.ittrain(args.inputFile,num_filt,kernel_size, num_dens_neurons, num_dens_layers, num_conv_2d,num_epochs+i,Loss)
-                    else:
-                        obj=pair_emd_loss_cnn.pair_EMD_CNN()
-                        mean, sd = obj.ittrain(data,num_filt,kernel_size, num_dens_neurons, num_dens_layers, num_conv_2d,num_epochs+i,Loss)
+                    obj=pair_emd_loss_cnn.pair_EMD_CNN()
+                    mean, sd = obj.ittrain(data,num_filt,kernel_size, num_dens_neurons, num_dens_layers, num_conv_2d,num_epochs+i,Loss)
                 else:
                     print("Input which dataset(s) to train EMD_CNN on")
                 mean_data.append(mean)
@@ -130,4 +125,3 @@ def main(args):
 if __name__ == '__main__':
     args = parser.parse_args()
     main(args)
-
