@@ -19,3 +19,9 @@ The ntuplizer should be run with a threshold sum algorithm, with the threshold s
 ```
 python3 produceTrainingData.py -i /TTbar_v11/ -o ./5Elinks_Layer9_test0.csv
 ```
+Required packages
+
+```
+pip install awkward==1.7.0
+```
+(does not work with Awkward 1.8.0)
