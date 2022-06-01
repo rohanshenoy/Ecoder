@@ -12,12 +12,13 @@ Also found here:
 
 ```
 /eos/uscms/store/user/lpchgcal/ConcentratorNtuples/L1THGCal_Ntuples/TTbar_v11/
+/eos/uscms/stor/user/rshenoy/HGCAL/EleGun/
 ```
 
 The ntuplizer should be run with a threshold sum algorithm, with the threshold set to 0, such that all trigger cells are saved in the resulting root file.
 
 ```
-python3 produceTrainingData.py -i /TTbar_v11/ -o ./5Elinks_Layer9_test0.csv
+python3 produceTrainingData.py -i /TTbar_v11/ -o ./5Elinks_Layer9_test0.csv --dir FloatingpointThreshold0DummyHistomaxGenmatchGenclustersntuple
 ```
 Required packages
 
