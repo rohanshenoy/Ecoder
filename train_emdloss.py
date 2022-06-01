@@ -44,7 +44,7 @@ parser.add_argument("--saveEnergy", action='store_true', default = False,dest="s
 def main(args):
   
     if(not args.aeEMD):
-        data=load_data(args)
+        data,phys=load_data(args)
     
     current_directory='ecoderemdvol/EleGun/EMD'
 
