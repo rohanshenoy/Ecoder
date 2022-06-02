@@ -46,7 +46,7 @@ def main(args):
     if(not args.aeEMD):
         data,phys=load_data(args)
     
-    current_directory='ecoderemdvol/EleGun/EMD'
+    current_directory='/ecoderemdvol/EleGun/EMD'
 
     #Data to track the performance of various EMD_CNN models
 
