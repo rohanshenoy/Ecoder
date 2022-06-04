@@ -119,5 +119,5 @@ def plot_eta(current_dir,models,phys):
     plt.legend(loc='upper right')
     plt.xlabel(r'$\eta$')
     plt.ylabel('EMD')
-    plt.savefig(current_dir+'ae_comp_eta_EMD',dpi=600)   
+    plt.savefig(current_dir+'/ae_comp_eta_EMD',dpi=600)   
  
