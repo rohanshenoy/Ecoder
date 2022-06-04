@@ -180,7 +180,7 @@ networks_by_name = [
          'CNN_strides':[(2,2)],
         },
     },
-
+    
     {'name':'8x8_c8_S2_pair_msle',
          'label':'8x8_c[8]_S2(pair_msle)',
      'arr_key':'8x8',
@@ -239,11 +239,11 @@ networks_by_name = [
          'CNN_kernel_size':[3],
          'CNN_strides':[(2,2)],
         },
-    },
+    }
+]
          
    
-"""
-         
+"""     
     {'name':'8x8_c8_S2_pair_huber',
          'label':'8x8_c[8]_S2(pair_huber)',
      'arr_key':'8x8',
