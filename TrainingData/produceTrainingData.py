@@ -5,7 +5,7 @@ import pandas as pd
 import awkward as ak
 
 def loadTrainingData(inputRoot,
-                     rootFileTDirectory='hgcalTriggerNtuplizer',
+                     rootFileTDirectory='FloatingpointThreshold0DummyHistomaxGenmatchGenclustersntuple',
                      outputFileName='CALQ.csv',
                      N_eLinks=5,
                      useADC=False,
@@ -80,7 +80,7 @@ if __name__=="__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument('-i','--input',dest='inputRoot', default='ntuple.root', help="TPG Ntuple directory/file to process")
-    parser.add_argument('-d','--dir',dest='rootFileTDirectory', default='hgcalTriggerNtuplizer', help="Directory within input root file to find HGCalTriggerNtuple TTree")
+    parser.add_argument('-d','--dir',dest='rootFileTDirectory', default='FloatingpointThreshold0DummyHistomaxGenmatchGenclustersntuple', help="Directory within input root file to find HGCalTriggerNtuple TTree")
     parser.add_argument('-N',dest='N_eLinks',type=int,default=5,help='Number of eRx to select')
     parser.add_argument('--ADC',dest='useADC',default=False,action='store_true',help='Use ADC rather than transverse ADC')
     parser.add_argument('-o','--output',dest='outputFileName',default='CALQ.csv',help='Output file name (either a .csv or .pkl file name)')
