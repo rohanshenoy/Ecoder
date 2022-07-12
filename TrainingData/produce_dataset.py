@@ -3,14 +3,10 @@ import uproot
 import numpy as np
 import pandas as pd
 import awkward as ak
-import argparse
 
-def loadWaferData(inputRoot,
-                     rootFileTDirectory='FloatingpointThreshold0DummyHistomaxGenmatchGenclustersntuple',
-                     outputFileName='CALQ.csv',
-                     N_eLinks=5,
-                     useADC=False,
-                     ):
+def loadEconData(inputRoot,
+                 rootFileTDirectory='FloatingpointAutoEncoderEMDAEMSEttbarDummyHistomaxGenmatchGenclustersntuple',
+                 outputFileName='econ_data.csv'):
     current_dir=os.getcwd()
     mergeTrainingData = pd.DataFrame()
     if os.path.isdir(inputRoot):
@@ -19,49 +15,74 @@ def loadWaferData(inputRoot,
             if os.path.isdir(inputRoot+infile): continue
             inputRootFile = os.path.join(inputRoot,infile)
             
-            _tree = uproot.open(inputRootFile)[f'{rootFileTDirectory}/HGCalTriggerNtuple']
+            ev_dict = uproot.open(inputRootFile)[rootFileTDirectory+'/HGCalTriggerNtuple']
+            
+            arrays_toread = [
+                "econ_index","econ_data",
+                "econ_subdet","econ_zside","econ_layer","econ_waferu","econ_waferv","econ_wafertype",
+                "tc_simenergy",
+                "tc_subdet","tc_zside","tc_layer","tc_waferu","tc_waferv","tc_wafertype",
+                "gen_pt","gen_energy","gen_eta","gen_phi",
+                "genpart_pt","genpart_energy",
+            ]
+            events = ev_dict.arrays(arrays_toread)
 
-            hasSimEnergy = 'tc_simenergy' in _tree
-            if hasSimEnergy:
-                arrays = _tree.arrays(['tc_zside','tc_layer','tc_waferu','tc_waferv','tc_cellu','tc_cellv','tc_data','tc_eta','tc_simenergy'])
-            else:
-                arrays = _tree.arrays(['tc_zside','tc_layer','tc_waferu','tc_waferv','tc_cellu','tc_cellv','tc_data','tc_eta'])
+            econ = ak.zip({
+                "index": events['econ_index'],
+                "data": events["econ_data"],
+                "subdet": events["econ_subdet"],
+                "zside": events["econ_zside"],
+                "layer": events["econ_layer"],
+                "waferu": events["econ_waferu"],
+                "waferv": events["econ_waferv"],
+            })
+            tc = ak.zip({
+                "simenergy": events["tc_simenergy"],
+                "subdet": events["tc_subdet"],
+                "zside": events["tc_zside"],
+                "layer": events["tc_layer"],
+                "waferu": events["tc_waferu"],
+                "waferv": events["tc_waferv"],
+            })
+            gen = ak.zip({
+                "pt": events["gen_pt"],
+                "energy": events["gen_energy"],
+                "eta": events["gen_eta"],
+                "phi": events["gen_phi"],
+            })
 
-            select_eLinks = {5 : (arrays[b'tc_layer']==9),
-                             4 : (arrays[b'tc_layer']==7) | (arrays[b'tc_layer']==11),
-                             3 : (arrays[b'tc_layer']==13),
-                             2 : (arrays[b'tc_layer']<7) | (arrays[b'tc_layer']>13),
-                             -1 : (arrays[b'tc_layer']>0)}
+            # find wafers that we want to save
+            # the problem is that the number of wafers from trigger cells: trigger cells/48 
+            # is not the same as the number of wafers from econ data: econ_data/16
+            df_tc = ak.to_pandas(tc)
+            df_econ = ak.to_pandas(econ)
+            df_gen = ak.to_pandas(gen)
 
-            assert N_eLinks in select_eLinks
+            df_simtotal = df_tc.groupby(['entry','subdet','zside','layer','waferu','waferv'])["simenergy"].sum()
+            df_econ.index.names
+            df_econ.reset_index(inplace=True)
+            df_econ.set_index(['entry','subdet','zside','layer','waferu','waferv'],inplace=True)
+            df_econ['simenergy'] = df_simtotal
+            df_econ.drop(columns='subentry',inplace=True)
+            #print(df_econ['simenergy'][df_econ['simenergy'] >0])
+            df_econ_wsimenergy = df_econ[df_econ.simenergy > 0]
+            df_econ_wsimenergy = df_econ_wsimenergy.rename(columns={"index": "econ_index", "data": "econ_data", "simenergy": "wafer_energy"})
+            df_econ_wsimenergy.reset_index(inplace=True)
+            df_econ_wsimenergy.set_index(['entry'],inplace=True)
+            df=df_econ_wsimenergy
+            df['WaferEntryIdx'] = (df.layer*10000 + df.waferu*100 + df.waferv)*df.zside
+            dfTrainData = df.pivot_table(index='WaferEntryIdx',columns='econ_index',values='econ_data').fillna(0).astype(int)
+            dfTrainData.columns = [f'CALQ_{i}' for i in range(16)]
 
-            df = ak.to_pandas(arrays[select_eLinks[N_eLinks]])
-
-            dfRemap = pd.read_csv('/ecoderemdvol/HGCal22Data_signal_driven_ttbar_v11/tcRemap.csv')
-            df = df.reset_index().merge(dfRemap)
-
-            df['ADCT'] = (df.tc_data* ((1./np.cosh(df.tc_eta))*2**12).astype(int)/2**12).astype(int)
-
-            #create new unique index (can't get pivot working on multi-indexing, but this is essentially the same)
-            df['WaferEntryIdx'] = (df.entry*1000000 + df.tc_layer*10000 + df.tc_waferu*100 + df.tc_waferv)*df.tc_zside
-
-            val = 'ADCT'
-            if useADC:
-                val='tc_data'
-            dfTrainData = df.pivot_table(index='WaferEntryIdx',columns='tc_cell_train',values=val).fillna(0).astype(int)
-            dfTrainData.columns = [f'CALQ_{i}' for i in range(48)]
-
-            dfTrainData[['entry','zside','layer','waferu','waferv']] = df.groupby(['WaferEntryIdx'])[['entry','tc_zside','tc_layer','tc_waferu','tc_waferv']].mean()
-
-            if hasSimEnergy:
-                dfTrainData['simenergy'] = df.groupby(['WaferEntryIdx'])[['tc_simenergy']].sum()
-
+            dfTrainData[['subdet','zside','layer','waferu','waferv','wafer_energy']] = df.groupby(['WaferEntryIdx'])[['subdet','zside','layer','waferu','waferv','wafer_energy']].mean()
+            dfTrainData[['subdet','zside','layer','waferu','waferv']] = dfTrainData[['subdet','zside','layer','waferu','waferv']].astype(int)
+            
             #Mapping wafer_u,v to physical coordinates
             dfEtaPhi=pd.read_csv('/ecoderemdvol/HGCal22Data_signal_driven_ttbar_v11/WaferEtaPhiMap.csv')
-            dfTrainData=dfTrainData.merge(dfEtaPhi, on=['layer','waferu','waferv'])
+            dfTrainData=dfTrainData.merge(dfEtaPhi, on=['subdet','layer','waferu','waferv'])
             dfTrainData.reset_index(drop=True,inplace=True)
-            mergeTrainingData=pd.concat([mergeTrainingData,dfTrainData])
-            
+            mergeTrainingData=pd.concat([mergeTrainingData,dfTrainData])   
+
     if '.csv' in outputFileName:
         mergeTrainingData.to_csv(outputFileName,index=False)
     if '.pkl' in outputFileName:
@@ -71,47 +92,16 @@ def loadWaferData(inputRoot,
 
     return mergeTrainingData
 
-def loadParticleData(inputRoot):
-    
-    particle_features = [ 'genpart_eta',
-                         'genpart_phi',
-                         'genpart_pt',
-                         'genpart_energy']
-    
-    current_dir=os.getcwd()
-    mergeTrainingData = pd.DataFrame()
-    if os.path.isdir(inputRoot):
-        for infile in os.listdir(inputRoot):
-            if os.path.isdir(inputRoot+infile): continue
-            inputRootFile = os.path.join(inputRoot,infile)
-            
-            HGCal_ntuple = uproot.open(inputRootFile)
-            
-            truth_df = pd.DataFrame(columns = particle_features)
-            
-            for p_f in particle_features:
-                truth_df[p_f]=np.asarray((HGCal_ntuple['FloatingpointThreshold0DummyHistomaxGenmatchGenclustersntuple']['HGCalTriggerNtuple'][p_f].array())[0])
-            
-            mergeTrainingData=pd.concat([mergeTrainingData,truth_df])
-    
-    mergeTrainingData.to_csv('particle_features.csv',index=False)
-    return mergeTrainingData
-            
 if __name__=="__main__":
+    import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('-i','--input',dest='inputRoot', default='ntuple.root', help="TPG Ntuple directory/file to process")
-    parser.add_argument('-d','--dir',dest='rootFileTDirectory', default='FloatingpointThreshold0DummyHistomaxGenmatchGenclustersntuple', help="Directory within input root file to find HGCalTriggerNtuple TTree")
-    parser.add_argument('-N',dest='N_eLinks',type=int,default=5,help='Number of eRx to select')
-    parser.add_argument('--ADC',dest='useADC',default=False,action='store_true',help='Use ADC rather than transverse ADC')
-    parser.add_argument('-o','--output',dest='outputFileName',default='CALQ.csv',help='Output file name (either a .csv or .pkl file name)')
+    parser.add_argument('-i','--input',dest='inputRoot', default='econ_ntuple.root', help="TPG Ntuple directory/file to process")
+    parser.add_argument('-d','--dir',dest='rootFileTDirectory', default='FloatingpointAutoEncoderEMDAEMSEttbarDummyHistomaxGenmatchGenclustersntuple', help="Directory within input root file to find HGCalTriggerNtuple TTree")
+    parser.add_argument('-o','--output',dest='outputFileName',default='econ_data.csv',help='Output file name (either a .csv or .pkl file name)')
 
     args = parser.parse_args()
 
-    wafer_data = loadWaferData(inputRoot = args.inputRoot,
+    df = loadEconData(inputRoot = args.inputRoot,
                           rootFileTDirectory = args.rootFileTDirectory,
-                          outputFileName = args.outputFileName,
-                          N_eLinks = args.N_eLinks,
-                          useADC = args.useADC)
-    particle_data = loadParticleData(inputRoot = args.inputRoot)
-    
+                          outputFileName = args.outputFileName)
