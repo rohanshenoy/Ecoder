@@ -8,8 +8,9 @@ def loadTrainingData(inputRoot,
                      rootFileTDirectory='FloatingpointThreshold0DummyHistomaxGenmatchGenclustersntuple',
                      outputFileName='CALQ.csv',
                      N_eLinks=5,
-                     useADC=False,
-                     ):
+                     abs_eta_min=1.5,
+                     abs_eta_max=2.0,
+                     useADC=False):
     current_dir=os.getcwd()
     mergeTrainingData = pd.DataFrame()
     if os.path.isdir(inputRoot):
@@ -60,12 +61,10 @@ def loadTrainingData(inputRoot,
             dfTrainData=dfTrainData.merge(dfEtaPhi, on=['layer','waferu','waferv'])
             dfTrainData.reset_index(drop=True,inplace=True)
             mergeTrainingData=pd.concat([mergeTrainingData,dfTrainData])
-            
-            
-
-            
     
-
+    mergeTrainingData = mergeTrainingData[abs(mergeTrainingData.tc_eta)>abs_eta_min]
+    mergeTrainingData = mergeTrainingData[abs(mergeTrainingData.tc_eta)<abs_eta_max]
+      
     if '.csv' in outputFileName:
         mergeTrainingData.to_csv(outputFileName,index=False)
     if '.pkl' in outputFileName:
@@ -84,11 +83,15 @@ if __name__=="__main__":
     parser.add_argument('-N',dest='N_eLinks',type=int,default=5,help='Number of eRx to select')
     parser.add_argument('--ADC',dest='useADC',default=False,action='store_true',help='Use ADC rather than transverse ADC')
     parser.add_argument('-o','--output',dest='outputFileName',default='CALQ.csv',help='Output file name (either a .csv or .pkl file name)')
-
+    parser.add_argument('--eta_min', dest='abs_eta_min', type=float, default=1.50, help='minimum wafer_eta')
+    parser.add_argument('--eta_max', dest='abs_eta_max', type=float, default=2.00, help='maximum wafer_eta')
+    
     args = parser.parse_args()
 
     df = loadTrainingData(inputRoot = args.inputRoot,
                           rootFileTDirectory = args.rootFileTDirectory,
                           outputFileName = args.outputFileName,
                           N_eLinks = args.N_eLinks,
+                          abs_eta_min = args.abs_eta_min,
+                          abs_eta_max = args.abs_eta_max,
                           useADC = args.useADC)
