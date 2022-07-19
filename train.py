@@ -147,7 +147,7 @@ def load_data(args):
             infile = os.path.join(args.inputFile,infile)
             if args.noHeader:
                 df_arr.append(pd.read_csv(infile, dtype=np.float64, header=0, nrows = args.nrowsPerFile, usecols=[*range(0,48)], names=CALQ_COLS))
-                phy_arr.append(pd.read_csv(infile, dtype=np.float64, header=0, nrows = args.nrowsPerFile, usecols=[*range(54,56)], names=COORD_COLS))
+                phy_arr.append(pd.read_csv(infile, dtype=np.float64, header=0, nrows = args.nrowsPerFile, usecols=[*range(55,57)], names=COORD_COLS))
             else:
                 df_arr.append(pd.read_csv(infile, nrows=args.nrowsPerFile))
         data = pd.concat(df_arr)
