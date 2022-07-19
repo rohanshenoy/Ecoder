@@ -121,7 +121,8 @@ def load_data(args):
     
     #Keep track of phys data
     COORD_COLS=['tc_eta','tc_phi']
-    
+    data={}
+    phys={}
     def mask_data(data,args):
         # mask rows where occupancy is zero
         mask_occupancy = (data[CALQ_COLS].astype('float64').sum(axis=1) != 0)
