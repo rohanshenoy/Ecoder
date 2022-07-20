@@ -15,6 +15,9 @@ from train import load_data
 parser = argparse.ArgumentParser()
 parser.add_argument('-i',"--inputFile", type=str, default='/ecoderemdvol/test_ae/', dest="inputFile",
                     help="previous AE training")
+parser.add_argument('-o',"--outputDir", type=str, default='/ecoderemdvol/EleGun/EMD/', dest="outputDir",
+                    help="previous AE training")
+
 parser.add_argument("--epochs", type=int, default = 64, dest="num_epochs",
                     help="number of epochs to train")
 parser.add_argument("--pairEMD", action='store_true', default = False,dest="pairEMD",
@@ -46,7 +49,7 @@ def main(args):
     if(not args.aeEMD):
         data,phys=load_data(args)
     
-    current_directory='/ecoderemdvol/EleGun/EMD'
+    current_directory=os.getcwd()
 
     #Data to track the performance of various EMD_CNN models
 
@@ -74,7 +77,7 @@ def main(args):
               [128,5,256,1,4]]
     """
     
-    loss_list=['huber_loss']#'msle','mse']
+    loss_list=['mse']
     
     num_epochs=args.num_epochs
     
@@ -91,12 +94,12 @@ def main(args):
             for i in [0,1,2,3,4]:
                 mean ,sd=0, 0
                 if(args.aeEMD):
-                    mean,sd=ae_EMD_CNN.ittrain(args.inputFile,num_filt,kernel_size, num_dens_neurons, num_dens_layers, num_conv_2d,num_epochs+i,Loss)
+                    mean,sd=ae_EMD_CNN.ittrain(args.inputFile,num_filt,kernel_size, num_dens_neurons, num_dens_layers, num_conv_2d,num_epochs+i,Loss,args.outputDir)
                 elif(args.appEMD):
-                    mean,sd=app_EMD_CNN.ittrain(data,args.inputFile,num_filt,kernel_size, num_dens_neurons, num_dens_layers, num_conv_2d,num_epochs+i,Loss)    
+                    mean,sd=app_EMD_CNN.ittrain(data,args.inputFile,num_filt,kernel_size, num_dens_neurons, num_dens_layers, num_conv_2d,num_epochs+i,Loss,args.outputDir)    
                 elif(args.pairEMD):
                     obj=pair_emd_loss_cnn.pair_EMD_CNN()
-                    mean, sd = obj.ittrain(data,num_filt,kernel_size, num_dens_neurons, num_dens_layers, num_conv_2d,num_epochs+i,Loss)
+                    mean, sd = obj.ittrain(data,num_filt,kernel_size, num_dens_neurons, num_dens_layers, num_conv_2d,num_epochs+i,Loss,args.outputDir)
                 else:
                     print("Input which dataset(s) to train EMD_CNN on")
                 mean_data.append(mean)
@@ -114,11 +117,11 @@ def main(args):
     #Saving data from the entire optimization training 
     
     if(args.aeEMD):
-        opt_data_directory=os.path.join(current_directory,'ae','EMD CNN Optimization Data.xlsx')
+        opt_data_directory=os.path.join(outputDir,'ae','EMD CNN Optimization Data.xlsx')
     if(args.appEMD):
-        opt_data_directory=os.path.join(current_directory,'app','EMD CNN Optimization Data.xlsx')
+        opt_data_directory=os.path.join(outputDir,'app','EMD CNN Optimization Data.xlsx')
     if(args.pairEMD):
-        opt_data_directory=os.path.join(current_directory,'pair','EMD CNN Optimization Data.xlsx') 
+        opt_data_directory=os.path.join(outputDir,'pair','EMD CNN Optimization Data.xlsx') 
     df=pd.DataFrame(for_pdata)
     df.to_excel(opt_data_directory)
 
