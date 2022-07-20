@@ -35,7 +35,7 @@ class ae_EMD_CNN:
     X1_train=[]
     X2_train=[]
     
-    def ittrain(test_ae_directory,num_filt, kernel_size, num_dens_neurons, num_dens_layers, num_conv_2d, num_epochs,Loss):
+    def ittrain(test_ae_directory,num_filt, kernel_size, num_dens_neurons, num_dens_layers, num_conv_2d, num_epochs,Loss,outputDir):
         
         def load_data(inputFile):
             
@@ -43,8 +43,6 @@ class ae_EMD_CNN:
             data_values=data.values
             
             return data_values
-        
-        current_directory='/ecoderemdvol/EleGun/EMD/EPGun-PU200/ae/'
         
         #Take dataset PASSED from previous Autoencoder Training
         csv_directory=os.path.join(test_ae_directory,'8x8_c8_S2_tele')
@@ -174,11 +172,11 @@ class ae_EMD_CNN:
         sym_model = Model(inputs=[input1, input2], outputs=output, name='sym_model')
         sym_model.summary()
         
-        final_directory=os.path.join(current_directory,r'ae_emd_models')
+        final_directory=os.path.join(current_directory,r'ae',r'ae_emd_models')
         if not os.path.exists(final_directory):
                 os.makedirs(final_directory)
-        callbacks = [ModelCheckpoint('/ecoderemdvol/EleGun/EMD/EPGun-PU200/ae/ae_emd_models/'+str(num_filt)+str(kernel_size)+str(num_dens_neurons)+str(num_dens_layers)+str(num_conv_2d)+str(num_epochs)+Loss+'best.h5', monitor='val_loss', verbose=1, save_best_only=True),
-                     ModelCheckpoint('/ecoderemdvol/EleGun/EMD/EPGun-PU200/ae/ae_emd_models/'+str(num_filt)+str(kernel_size)+str(num_dens_neurons)+str(num_dens_layers)+str(num_conv_2d)+str(num_epochs)+Loss+'last.h5', monitor='val_loss', verbose=1, save_last_only=True),
+        callbacks = [ModelCheckpoint(final_directory+'/'+str(num_filt)+str(kernel_size)+str(num_dens_neurons)+str(num_dens_layers)+str(num_conv_2d)+str(num_epochs)+Loss+'best.h5', monitor='val_loss', verbose=1, save_best_only=True),
+                     ModelCheckpoint(final_directory+'/'+str(num_filt)+str(kernel_size)+str(num_dens_neurons)+str(num_dens_layers)+str(num_conv_2d)+str(num_epochs)+Loss+'last.h5', monitor='val_loss', verbose=1, save_last_only=True),
                     ]
         
         #opt = tf.keras.optimizers.Adam(learning_rate=4e-3)
@@ -190,7 +188,7 @@ class ae_EMD_CNN:
         
         #Making directory for graphs
 
-        img_directory=os.path.join(current_directory,r'AE EMD Plots')
+        img_directory=os.path.join(outputDir,r'ae',r'AE EMD Plots')
         if not os.path.exists(img_directory):
             os.makedirs(img_directory)
 
