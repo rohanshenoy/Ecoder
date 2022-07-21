@@ -49,7 +49,7 @@ def main(args):
     if(not args.aeEMD):
         data,phys=load_data(args)
     
-    current_directory=os.getcwd()
+    current_directory='/ecoderemdvol/EleGun/EMD/EPGun-PU200/eta_1/'
 
     #Data to track the performance of various EMD_CNN models
 
@@ -94,12 +94,12 @@ def main(args):
             for i in [0,1,2,3,4]:
                 mean ,sd=0, 0
                 if(args.aeEMD):
-                    mean,sd=ae_EMD_CNN.ittrain(args.inputFile,num_filt,kernel_size, num_dens_neurons, num_dens_layers, num_conv_2d,num_epochs+i,Loss,args.outputDir)
+                    mean,sd=ae_EMD_CNN.ittrain(args.inputFile,num_filt,kernel_size, num_dens_neurons, num_dens_layers, num_conv_2d,num_epochs+i,Loss)
                 elif(args.appEMD):
-                    mean,sd=app_EMD_CNN.ittrain(data,args.inputFile,num_filt,kernel_size, num_dens_neurons, num_dens_layers, num_conv_2d,num_epochs+i,Loss,args.outputDir)    
+                    mean,sd=app_EMD_CNN.ittrain(data,args.inputFile,num_filt,kernel_size, num_dens_neurons, num_dens_layers, num_conv_2d,num_epochs+i,Loss)    
                 elif(args.pairEMD):
                     obj=pair_emd_loss_cnn.pair_EMD_CNN()
-                    mean, sd = obj.ittrain(data,num_filt,kernel_size, num_dens_neurons, num_dens_layers, num_conv_2d,num_epochs+i,Loss,args.outputDir)
+                    mean, sd = obj.ittrain(data,num_filt,kernel_size, num_dens_neurons, num_dens_layers, num_conv_2d,num_epochs+i,Loss)
                 else:
                     print("Input which dataset(s) to train EMD_CNN on")
                 mean_data.append(mean)
@@ -117,11 +117,11 @@ def main(args):
     #Saving data from the entire optimization training 
     
     if(args.aeEMD):
-        opt_data_directory=os.path.join(outputDir,'ae','EMD CNN Optimization Data.xlsx')
+        opt_data_directory=os.path.join(current_directory,'ae','EMD CNN Optimization Data.xlsx')
     if(args.appEMD):
-        opt_data_directory=os.path.join(outputDir,'app','EMD CNN Optimization Data.xlsx')
+        opt_data_directory=os.path.join(current_directory,'app','EMD CNN Optimization Data.xlsx')
     if(args.pairEMD):
-        opt_data_directory=os.path.join(outputDir,'pair','EMD CNN Optimization Data.xlsx') 
+        opt_data_directory=os.path.join(current_directory,'pair','EMD CNN Optimization Data.xlsx') 
     df=pd.DataFrame(for_pdata)
     df.to_excel(opt_data_directory)
 
