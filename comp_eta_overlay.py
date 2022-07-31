@@ -13,13 +13,13 @@ import os
 import pandas as pd
 
 def load_data(inputFile):
-    data=pd.read_csv(inputFile,usecols=[*range(0,48)],nrows=800)
+    data=pd.read_csv(inputFile,usecols=[*range(0,48)],nrows=1000000)
     data_values=data.values
             
     return data_values
 
 def load_phy(inputFile):
-    data=pd.read_csv(inputFile,usecols=[*range(48,49)],nrows=80)
+    data=pd.read_csv(inputFile,usecols=[*range(48,49)],nrows=1000000)
     data_values=data.values
             
     return data_values
