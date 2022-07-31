@@ -122,7 +122,7 @@ for iteration,emd in enumerate(emd_values_arr):
 plt.legend(loc='upper right')
 plt.xlabel(r'$\eta$')
 plt.ylabel('EMD')
-plt.savefig('comp_split_eta_EMD.pdf',dpi=300)
+plt.savefig('/ecoderemdvol/comp_split_eta_EMD.pdf',dpi=300)
     
     
 
