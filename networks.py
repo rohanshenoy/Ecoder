@@ -180,145 +180,47 @@ networks_by_name = [
          'CNN_strides':[(2,2)],
         },
     },
-
-    {'name':'8x8_c8_S2_ae_mse_eta_1',
-         'label':'8x8_c[8]_S2(ae_mse_eta_1)',
+    
+    {'name':'8x8_c8_S2_qK_RTL_emd_ttbar',
+     'label':'8x8_c[8]_S2_q_emd_ttbar',
      'arr_key':'8x8',
+     'isQK':True,
      'params':{
          'shape':(8,8,1),
-         'loss':get_emd_loss("ae_mse_eta_1"),
+         'loss':get_emd_loss('ae_mse_ttbar'),
          'CNN_layer_nodes':[8],
          'CNN_kernel_size':[3],
          'CNN_strides':[(2,2)],
         },
     },
     
-    {'name':'8x8_c8_S2_ae_mse_eta_2',
-         'label':'8x8_c[8]_S2(ae_mse_eta_2)',
+    {'name':'8x8_c8_S2_qK_RTL_emd_egun',
+     'label':'8x8_c[8]_S2_q_emd_egun',
      'arr_key':'8x8',
+     'isQK':True,
      'params':{
          'shape':(8,8,1),
-         'loss':get_emd_loss("ae_mse_eta_2"),
+         'loss':get_emd_loss('ae_mse_egun'),
          'CNN_layer_nodes':[8],
          'CNN_kernel_size':[3],
          'CNN_strides':[(2,2)],
         },
     },
-         
-    {'name':'8x8_c8_S2_ae_mse_full_eta',
-         'label':'8x8_c[8]_S2(ae_mse_full_eta)',
+    
+    {'name':'8x8_c8_S2_qK_RTL_emd_epgun',
+     'label':'8x8_c[8]_S2_q_emd_epgun',
      'arr_key':'8x8',
+     'isQK':True,
      'params':{
          'shape':(8,8,1),
-         'loss':get_emd_loss("ae_mse_full_eta"),
+         'loss':get_emd_loss('ae_mse_epgun'),
          'CNN_layer_nodes':[8],
          'CNN_kernel_size':[3],
          'CNN_strides':[(2,2)],
         },
     }
-         
+    
 ]
-         
-   
-"""
-
-    
-    {'name':'8x8_c8_S2_pair_msle',
-         'label':'8x8_c[8]_S2(pair_msle)',
-     'arr_key':'8x8',
-     'params':{
-         'shape':(8,8,1),
-         'loss':get_emd_loss("pair_msle"),
-         'CNN_layer_nodes':[8],
-         'CNN_kernel_size':[3],
-         'CNN_strides':[(2,2)],
-        },
-    },
-
-    {'name':'8x8_c8_S2_pair_mse',
-         'label':'8x8_c[8]_S2(pair_mse)',
-     'arr_key':'8x8',
-     'params':{
-         'shape':(8,8,1),
-         'loss':get_emd_loss("pair_mse"),
-         'CNN_layer_nodes':[8],
-         'CNN_kernel_size':[3],
-         'CNN_strides':[(2,2)],
-        },
-    },
-
-    {'name':'8x8_c8_S2_ae_huber',
-         'label':'8x8_c[8]_S2(ae_huber)',
-     'arr_key':'8x8',
-     'params':{
-         'shape':(8,8,1),
-         'loss':get_emd_loss("ae_huber"),
-         'CNN_layer_nodes':[8],
-         'CNN_kernel_size':[3],
-         'CNN_strides':[(2,2)],
-        },
-    },
-
-    {'name':'8x8_c8_S2_ae_msle',
-         'label':'8x8_c[8]_S2(ae_msle)',
-     'arr_key':'8x8',
-     'params':{
-         'shape':(8,8,1),
-         'loss':get_emd_loss("ae_msle"),
-         'CNN_layer_nodes':[8],
-         'CNN_kernel_size':[3],
-         'CNN_strides':[(2,2)],
-        },
-    },
-    {'name':'8x8_c8_S2_pair_huber',
-         'label':'8x8_c[8]_S2(pair_huber)',
-     'arr_key':'8x8',
-     'params':{
-         'shape':(8,8,1),
-         'loss':get_emd_loss("pair_huber"),
-         'CNN_layer_nodes':[8],
-         'CNN_kernel_size':[3],
-         'CNN_strides':[(2,2)],
-        },
-    },
-,
-
-    {'name':'8x8_c8_S2_app_huber',
-         'label':'8x8_c[8]_S2(app_huber)',
-     'arr_key':'8x8',
-     'params':{
-         'shape':(8,8,1),
-         'loss':get_emd_loss("app_huber"),
-         'CNN_layer_nodes':[8],
-         'CNN_kernel_size':[3],
-         'CNN_strides':[(2,2)],
-        },
-    }
-    
-{'name':'8x8_c8_S2_app_msle',
-         'label':'8x8_c[8]_S2(app_msle)',
-     'arr_key':'8x8',
-     'params':{
-         'shape':(8,8,1),
-         'loss':get_emd_loss("app_msle"),
-         'CNN_layer_nodes':[8],
-         'CNN_kernel_size':[3],
-         'CNN_strides':[(2,2)],
-        },
-    },
-
-    {'name':'8x8_c8_S2_app_mse',
-         'label':'8x8_c[8]_S2(app_mse)',
-     'arr_key':'8x8',
-     'params':{
-         'shape':(8,8,1),
-         'loss':get_emd_loss("app_mse"),
-         'CNN_layer_nodes':[8],
-         'CNN_kernel_size':[3],
-         'CNN_strides':[(2,2)],
-        },
-    }
-"""
 
 defaults = {'channels_first': False,
             'encoded_dim': 16,

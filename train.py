@@ -8,6 +8,9 @@ import numba
 import tensorflow as tf
 from tensorflow.keras import losses
 
+from tensorflow.keras import callbacks
+from tensorflow import keras as kr
+
 from qkeras import get_quantizer,QActivation
 from qkeras.utils import model_save_quantized_weights
 
@@ -147,8 +150,8 @@ def load_data(args):
             if os.path.isdir(args.inputFile+infile): continue
             infile = os.path.join(args.inputFile,infile)
             if args.noHeader:
-                df_arr.append(pd.read_csv(infile, dtype=np.float64, header=0, nrows = args.nrowsPerFile, usecols=[*range(0,48)], names=CALQ_COLS))
-                phy_arr.append(pd.read_csv(infile, dtype=np.float64, header=0, nrows = args.nrowsPerFile, usecols=[*range(55,57)], names=COORD_COLS))
+                df_arr.append(pd.read_csv(infile, dtype=np.float64, header=0, nrows = args.nrowsPerFile, usecols= CALQ_COLS))
+                phy_arr.append(pd.read_csv(infile, dtype=np.float64, header=0, nrows = args.nrowsPerFile,usecols=COORD_COLS))
             else:
                 df_arr.append(pd.read_csv(infile, nrows=args.nrowsPerFile))
         data = pd.concat(df_arr)
@@ -215,14 +218,17 @@ def build_model(args):
     else:
         _logger.warning('Must specify encoding bits for nElink %i'%args.nElinks)
         
-    for m in models:
-        if not 'nBits_encod' in m['params'].keys():
-            m['params'].update({'nBits_encod':nBits_encod})
-            
     nBits_input  = {'total': 10, 'integer': 3, 'keep_negative':1}
     nBits_accum  = {'total': 11, 'integer': 3, 'keep_negative':1}
     nBits_weight = {'total':  5, 'integer': 1, 'keep_negative':1} # sign bit not included
-
+    
+    for m in models:
+        if not 'nBits_encod' in m['params'].keys():
+            m['params'].update({'nBits_encod':nBits_encod})
+            m['params'].update({'nBits_input':nBits_input})
+            m['params'].update({'nBits_accum':nBits_accum})
+            m['params'].update({'nBits_weight':nBits_weight})
+            
     for m in models:
         # print nbits for qkeras
         if m['isQK']:
@@ -272,8 +278,6 @@ def split(shaped_data, validation_frac=0.2,randomize=False):
     return val_input,train_input,val_index,train_index
 
 def train(autoencoder,encoder,train_input,train_target,val_input,name,n_epochs=100, train_weights=None):
-    from tensorflow.keras import callbacks
-    from tensorflow import keras as kr
     es = callbacks.EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=30)
 
     if train_weights != None:
