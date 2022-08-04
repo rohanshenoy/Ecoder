@@ -57,7 +57,7 @@ for i in indices_egun:
 for i in indices_epgun:
     eta_epgun=np.append(eta_epgun,phys_epgun[i][0])
 
-offset=0.75*((np.max(eta_ttbar)-np.min(eta_ttbar))/10)/2
+offsets=[0,0.02,-0.02]
  
 emd_values_ttbar_emd  = np.array([emd(ttbar_emd_input_Q[i],ttbar_emd_output_Q[j]) for i, j in zip(indices_ttbar,indices_ttbar)]) 
 emd_values_egun_emd  = np.array([emd(egun_emd_input_Q[i],egun_emd_output_Q[j]) for i, j in zip(indices_egun,indices_egun)])     
@@ -106,11 +106,10 @@ for iteration,emd in enumerate(emd_values_arr):
     bin_edges = median_result.bin_edges
     bin_centers = (bin_edges[:-1] + bin_edges[1:])/2.
     
-    off = 0
-    if iteration != 1:
-        off = offset*iteration
+    off = offsets[iteration]
     plt.errorbar(x=bin_centers+off, y=median, yerr=[one_sigma_loe,one_sigma_hie],label=labels[iteration],color=colors1[iteration])
     plt.errorbar(x=bin_centers+off, y=median, yerr=[two_sigma_loe,two_sigma_hie],fmt='--',alpha=0.5,color=colors2[iteration])
+    
     
 plt.legend(loc='upper right')
 plt.xlabel(r'$\eta$')
