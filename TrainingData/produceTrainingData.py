@@ -23,9 +23,9 @@ def loadTrainingData(inputRoot,
 
             hasSimEnergy = 'tc_simenergy' in _tree
             if hasSimEnergy:
-                arrays = _tree.arrays(['tc_zside','tc_layer','tc_waferu','tc_waferv','tc_cellu','tc_cellv','tc_data','tc_eta','tc_simenergy'])
+                arrays = _tree.arrays(['tc_zside','tc_layer','tc_waferu','tc_waferv','tc_cellu','tc_cellv','tc_data','tc_eta','tc_simenergy','gen_pt'])
             else:
-                arrays = _tree.arrays(['tc_zside','tc_layer','tc_waferu','tc_waferv','tc_cellu','tc_cellv','tc_data','tc_eta'])
+                arrays = _tree.arrays(['tc_zside','tc_layer','tc_waferu','tc_waferv','tc_cellu','tc_cellv','tc_data','tc_eta','gen_pt'])
 
             select_eLinks = {5 : (arrays[b'tc_layer']==9),
                              4 : (arrays[b'tc_layer']==7) | (arrays[b'tc_layer']==11),
@@ -36,8 +36,9 @@ def loadTrainingData(inputRoot,
             assert N_eLinks in select_eLinks
 
             df = ak.to_pandas(arrays[select_eLinks[N_eLinks]])
+            df = df[df.gen_pt < 35]
 
-            dfRemap = pd.read_csv('/ecoderemdvol/HGCal22Data_signal_driven_ttbar_v11/tcRemap.csv')
+            dfRemap = pd.read_csv('tcRemap.csv')
             df = df.reset_index().merge(dfRemap)
 
             df['ADCT'] = (df.tc_data* ((1./np.cosh(df.tc_eta))*2**12).astype(int)/2**12).astype(int)
@@ -57,7 +58,7 @@ def loadTrainingData(inputRoot,
                 dfTrainData['simenergy'] = df.groupby(['WaferEntryIdx'])[['tc_simenergy']].sum()
 
             #Mapping wafer_u,v to physical coordinates
-            dfEtaPhi=pd.read_csv('/ecoderemdvol/HGCal22Data_signal_driven_ttbar_v11/WaferEtaPhiMap.csv')
+            dfEtaPhi=pd.read_csv('WaferEtaPhiMap.csv')
             dfTrainData=dfTrainData.merge(dfEtaPhi, on=['layer','waferu','waferv'])
             dfTrainData.reset_index(drop=True,inplace=True)
             mergeTrainingData=pd.concat([mergeTrainingData,dfTrainData])
