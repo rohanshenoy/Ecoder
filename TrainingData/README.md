@@ -17,8 +17,8 @@ Also found here:
 
 The ntuplizer should be run with a threshold sum algorithm, with the threshold set to 0, such that all trigger cells are saved in the resulting root file.
 
-```
-python3 produceTrainingData.py -i /TTbar_v11/ -o ./5Elinks_Layer9_test0.csv --dir FloatingpointThreshold0DummyHistomaxGenmatchGenclustersntuple
+``` 
+python3 produceTrainingData.py -i /EleGun/ -o ./5Elinks_Layer9_test0.csv --eta_min 1.5 --eta_max 1.75 --pt_max 35 --dir FloatingpointThreshold0DummyHistomaxGenmatchGenclustersntuple
 ```
 Required packages
 
