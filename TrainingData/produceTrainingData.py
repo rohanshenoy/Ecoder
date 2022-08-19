@@ -38,6 +38,12 @@ def loadTrainingData(inputRoot,
 
             mask = ak.Array(np.logical_and(np.asarray(pt_mask),np.asarray(eta_min_mask),np.asarray(eta_max_mask)))
             
+            #test if all events were discared, if all discarded skip this root file
+            
+            test = (mask == [False]*len(mask))
+            
+            if ak.all(test):continue
+            
             tc_mask_data = ak.Array(
                 {
                     'tc_zside': events['tc_zside'][mask],
