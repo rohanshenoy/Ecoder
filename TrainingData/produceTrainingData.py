@@ -32,9 +32,9 @@ def loadTrainingData(inputRoot,
             
             #make gen_pt and gen_eta cuts, gen eta cuts on electrons in positive eta, msking on both e +- event
             
-            pt_mask = (gen_pt <=35)[:,0]
-            eta_min_mask = (gen_eta[:,0] >=2.1)
-            eta_max_mask = (gen_eta[:,0] <= 2.7)
+            pt_mask = (gen_pt <=gen_pt_max)[:,0]
+            eta_min_mask = (gen_eta[:,0] >=abs_eta_min)
+            eta_max_mask = (gen_eta[:,0] <= abs_eta_max)
             mask = ak.Array(np.logical_and(np.asarray(pt_mask),np.asarray(eta_min_mask),np.asarray(eta_max_mask)))
             
             #test if all events were discared, if all discarded skip this root file
