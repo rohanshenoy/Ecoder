@@ -9,9 +9,9 @@ def loadTrainingData(inputRoot,
                      rootFileTDirectory='FloatingpointThreshold0DummyHistomaxGenmatchGenclustersntuple',
                      outputFileName='CALQ.csv',
                      N_eLinks=5,
-                     gen_pt_max = 200,
-                     abs_eta_min=1.6,
-                     abs_eta_max=3.0,
+                     gen_pt_max = 35,
+                     abs_eta_min=2.1,
+                     abs_eta_max=2.7,
                      useADC=False):
     current_dir=os.getcwd()
     mergeTrainingData = pd.DataFrame()
@@ -30,12 +30,11 @@ def loadTrainingData(inputRoot,
             gen_pt = events.gen_pt
             gen_eta = events.gen_eta
             
-            #make gen_pt and gen_eta cuts, gen eta cuts on electrons in positive eta, positron is also in same event
+            #make gen_pt and gen_eta cuts, gen eta cuts on electrons in positive eta, msking on both e +- event
             
-            pt_mask = (gen_pt <=gen_pt_max)[:,1]
-            eta_min_mask = (gen_eta >=abs_eta_min)[:,1]
-            eta_max_mask = (gen_eta <= abs_eta_max)[:,1]
-
+            pt_mask = (gen_pt <=35)[:,0]
+            eta_min_mask = (gen_eta[:,0] >=2.1)
+            eta_max_mask = (gen_eta[:,0] <= 2.7)
             mask = ak.Array(np.logical_and(np.asarray(pt_mask),np.asarray(eta_min_mask),np.asarray(eta_max_mask)))
             
             #test if all events were discared, if all discarded skip this root file
@@ -43,7 +42,7 @@ def loadTrainingData(inputRoot,
             test = (mask == [False]*len(mask))
             
             if ak.all(test):continue
-            
+
             tc_mask_data = ak.Array(
                 {
                     'tc_zside': events['tc_zside'][mask],
@@ -91,6 +90,9 @@ def loadTrainingData(inputRoot,
             dfTrainData=dfTrainData.merge(dfEtaPhi, on=['layer','waferu','waferv'])
             dfTrainData.reset_index(drop=True,inplace=True)
             mergeTrainingData=pd.concat([mergeTrainingData,dfTrainData])
+            #break if we have enough data
+            if len(mergeTrainingData['tc_eta']) > 5000000: break
+
       
     if '.csv' in outputFileName:
         mergeTrainingData.to_csv(outputFileName,index=False)
