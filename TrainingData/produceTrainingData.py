@@ -91,7 +91,7 @@ def loadTrainingData(inputRoot,
             dfTrainData.reset_index(drop=True,inplace=True)
             mergeTrainingData=pd.concat([mergeTrainingData,dfTrainData])
             #break if we have enough data
-            if len(mergeTrainingData['tc_eta']) > 5000000: break
+            #if len(mergeTrainingData['tc_eta']) > 5000000: break
 
       
     if '.csv' in outputFileName:
