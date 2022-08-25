@@ -177,8 +177,8 @@ class ae_EMD_CNN:
         final_directory=os.path.join(current_directory,r'ae_emd_models')
         if not os.path.exists(final_directory):
                 os.makedirs(final_directory)
-        callbacks = [ModelCheckpoint('/ecoderemdvol/EleGun/low_pt_high_eta/EMD/ae/ae/ae_emd_models/'+str(num_filt)+str(kernel_size)+str(num_dens_neurons)+str(num_dens_layers)+str(num_conv_2d)+str(num_epochs)+Loss+'best.h5', monitor='val_loss', verbose=1, save_best_only=True),
-                     ModelCheckpoint('/ecoderemdvol/EleGun/low_pt_high_eta/EMD/ae/ae/ae_emd_models/'+str(num_filt)+str(kernel_size)+str(num_dens_neurons)+str(num_dens_layers)+str(num_conv_2d)+str(num_epochs)+Loss+'last.h5', monitor='val_loss', verbose=1, save_last_only=True),
+        callbacks = [ModelCheckpoint('/ecoderemdvol/EleGun/low_pt_high_eta/EMD/ae/ae_emd_models/'+str(num_filt)+str(kernel_size)+str(num_dens_neurons)+str(num_dens_layers)+str(num_conv_2d)+str(num_epochs)+Loss+'best.h5', monitor='val_loss', verbose=1, save_best_only=True),
+                     ModelCheckpoint('/ecoderemdvol/EleGun/low_pt_high_eta/EMD/ae/ae_emd_models/'+str(num_filt)+str(kernel_size)+str(num_dens_neurons)+str(num_dens_layers)+str(num_conv_2d)+str(num_epochs)+Loss+'last.h5', monitor='val_loss', verbose=1, save_last_only=True),
                     ]
         
         #opt = tf.keras.optimizers.Adam(learning_rate=4e-3)
