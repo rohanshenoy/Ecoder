@@ -156,13 +156,13 @@ networks_by_name = [
         },
     },
     
-    {'name':'8x8_c8_S2_qK_RTL',
-     'label':'8x8_c[8]_S2',
+    {'name':'8x8_c8_S2_qK_RTL_tele',
+     'label':'8x8_c[8]_S2(tele)',
      'arr_key':'8x8',
      'isQK':True,
      'params':{
          'shape':(8,8,1),
-         'loss':'weightedMSE',
+         'loss':telescopeMSE8x8,
          'CNN_layer_nodes':[8],
          'CNN_kernel_size':[3],
          'CNN_strides':[(2,2)],
