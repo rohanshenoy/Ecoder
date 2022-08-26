@@ -218,8 +218,20 @@ networks_by_name = [
          'CNN_kernel_size':[3],
          'CNN_strides':[(2,2)],
         },
-    }
+    },
     
+    {'name':'8x8_c8_S2_qK_RTL_emd_lphe',
+     'label':'8x8_c[8]_S2_q_emd_lphe',
+     'arr_key':'8x8',
+     'isQK':True,
+     'params':{
+         'shape':(8,8,1),
+         'loss':get_emd_loss('ae_mse_lphe'),
+         'CNN_layer_nodes':[8],
+         'CNN_kernel_size':[3],
+         'CNN_strides':[(2,2)],
+        },
+    }
 ]
 
 defaults = {'channels_first': False,
