@@ -55,7 +55,7 @@ def loadTrainingData(inputRoot,
         }
     )
 
-    select_eLinks = {5 : (tc_mask_data[b'tc_layer']<=9) & (tc_mask_data[b'tc_layer']>=5) ,
+    select_eLinks = {5 : (tc_mask_data[b'tc_layer']<=11) & (tc_mask_data[b'tc_layer']>=5) ,
                      4 : (tc_mask_data[b'tc_layer']==7) | (tc_mask_data[b'tc_layer']==11),
                      3 : (tc_mask_data[b'tc_layer']==13),
                      2 : (tc_mask_data[b'tc_layer']<7) | (tc_mask_data[b'tc_layer']>13),
