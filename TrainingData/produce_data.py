@@ -50,7 +50,7 @@ def loadTrainingData(inputRoot,
             'tc_cellu': events['tc_cellu'][mask],
             'tc_cellv': events['tc_cellv'][mask],
             'tc_data': events['tc_data'][mask],
-            'tc_simenergy': events['tc_simenergy'][mask],
+            #'tc_simenergy': events['tc_simenergy'][mask],
             'tc_eta': events['tc_eta'][mask]
         }
     )
@@ -81,7 +81,7 @@ def loadTrainingData(inputRoot,
 
     dfTrainData[['entry','zside','layer','waferu','waferv']] = df.groupby(['WaferEntryIdx'])[['entry','tc_zside','tc_layer','tc_waferu','tc_waferv']].mean()
     
-    dfTrainData['simenergy'] = df.groupby(['WaferEntryIdx'])[['tc_simenergy']].sum()
+    #dfTrainData['simenergy'] = df.groupby(['WaferEntryIdx'])[['tc_simenergy']].sum()
 
     #Mapping wafer_u,v to physical coordinates
     dfEtaPhi=pd.read_csv('/ecoderemdvol/WaferEtaPhiMap.csv')
