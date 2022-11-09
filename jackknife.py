@@ -97,7 +97,7 @@ for i in range(n):
         
 df_emd = pd.DataFrame(full_jk)
 
-df_emd.to_csv('/ecoderemdvol/paper_plots/physics/emd_jk.csv')
+df_emd.to_csv('/ecoderemdvol/paper_plots/physics/emd_jk_2.csv')
 
 #telescope loss jacknife
 
@@ -134,7 +134,7 @@ for i in range(n):
         
 df_tele = pd.DataFrame(full_jk)
 
-df_emd.to_csv('/ecoderemdvol/paper_plots/physics/emd_jk.csv')
+df_emd.to_csv('/ecoderemdvol/paper_plots/physics/emd_tele.csv')
 
 
         
