@@ -64,6 +64,8 @@ select = emd.query('genpart_pid==1 and genpart_pt>10')
 eta['AElphe'] = select['genpart_abseta'].values
 pt['AElphe'] = select['corr_eta_over_gen_pt'].values
 
+"""
+
 #emd loss jacknife
 
 n = len(eta['AElphe'])
@@ -97,12 +99,10 @@ for i in range(n):
         
 df_emd = pd.DataFrame(full_jk)
 
-df_emd.to_csv('/ecoderemdvol/paper_plots/physics/emd_jk_2.csv')
+df_emd.to_csv('/ecoderemdvol/paper_plots/physics/emd_jk.csv')
+"""
 
 #telescope loss jacknife
-
-#emd loss jacknife
-
 n = len(eta['AEtele'])
 
 full_jk = np.empty(shape=(n,13))
@@ -134,7 +134,7 @@ for i in range(n):
         
 df_tele = pd.DataFrame(full_jk)
 
-df_emd.to_csv('/ecoderemdvol/paper_plots/physics/emd_tele.csv')
+df_tele.to_csv('/ecoderemdvol/paper_plots/physics/tele_jk.csv')
 
 
         
