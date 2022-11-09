@@ -66,7 +66,7 @@ pt['AElphe'] = select['corr_eta_over_gen_pt'].values
 
 #emd loss jacknife
 
-n = 300
+n = len(eta['AElphe'])
 
 full_jk = np.empty(shape=(n,13))
 
@@ -103,7 +103,7 @@ df_emd.to_csv('/ecoderemdvol/paper_plots/physics/emd_jk.csv')
 
 #emd loss jacknife
 
-n = 300
+n = len(eta['AEtele'])
 
 full_jk = np.empty(shape=(n,13))
 
