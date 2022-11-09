@@ -128,7 +128,7 @@ for i in range(n):
     pt_mean_binned['AEtele'] = (df.groupby('bin_eta').mean())['pt']
     pt_rms_eff_binned['AEtele'] = (df.groupby('bin_eta').apply(effrms))['pt']
     
-    physics_res = pt_rms_eff_binned['AElphe']/pt_mean_binned['AElphe']
+    physics_res = pt_rms_eff_binned['AEtele']/pt_mean_binned['AEtele']
     
     full_jk[i] = np.asarray(physics_res)
         
