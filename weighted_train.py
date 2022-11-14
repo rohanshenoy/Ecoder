@@ -195,7 +195,7 @@ def load_data(args):
 
     return (data_values,phys_values)
 
-def build_model(args):
+def build_model(args,sumdata):
     # import network architecture and loss function
     from networks import networks_by_name
 
