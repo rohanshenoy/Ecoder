@@ -195,7 +195,7 @@ def load_data(args):
 
     return (data_values,phys_values)
 
-def build_model(args,sumdata):
+def build_model(args):
     # import network architecture and loss function
     from networks import networks_by_name
 
@@ -252,7 +252,7 @@ def build_model(args,sumdata):
             _logger.info('Found user input weights, using %s'%m['ws'])
             
         if args.loss:
-            m['params']['loss'] = args.loss*sumdata
+            m['params']['loss'] = args.loss
 
     return models
 
@@ -280,10 +280,7 @@ def split(shaped_data, validation_frac=0.2,randomize=False):
 def train(autoencoder,encoder,train_input,train_target,val_input,name,n_epochs=100, train_weights=None):
     es = callbacks.EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=30)
 
-    if train_weights != None:
-        history = autoencoder.fit(train_input,train_target,sample_weight=train_weights,epochs=n_epochs,batch_size=500,shuffle=True,validation_data=(val_input,val_input),callbacks=[es])
-    else:
-        history = autoencoder.fit(train_input,train_target,epochs=n_epochs,batch_size=500,shuffle=True,validation_data=(val_input,val_input),callbacks=[es])
+    history = autoencoder.fit(train_input,train_target,sample_weight=train_weights,epochs=n_epochs,batch_size=500,shuffle=True,validation_data=(val_input,val_input),callbacks=[es])
 
     plot_loss(history,name)
 
@@ -590,7 +587,7 @@ def main(args):
         weights_maxQ = get_weights(maxdata,50,0,50)
 
     # build default AE models
-    models = build_model(args,sumdata)
+    models = build_model(args)
     
     # evaluate performance
     from utils.metrics import emd,d_weighted_mean,d_abs_weighted_rms,zero_frac,ssd
@@ -678,6 +675,7 @@ def main(args):
 
         val_max = maxdata[val_ind]
         val_sum = sumdata[val_ind]
+        train_sum = sumdata[train_ind]
         if args.occReweight:
             train_weights = np.multiply(weights_maxQ[train_ind], weights_occ[train_ind])
         else:
@@ -704,6 +702,7 @@ def main(args):
                                 train_input,train_input,val_input,
                                 name=model_name,
                                 n_epochs = args.epochs,
+                                train_weights = np.square(train_sum)
                                 )
         else:
             if args.retrain: # retrain w input weights
