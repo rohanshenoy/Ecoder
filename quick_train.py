@@ -275,10 +275,7 @@ def split(shaped_data, validation_frac=0.2,randomize=False):
 def train(autoencoder,encoder,train_input,train_target,val_input,name,n_epochs=100, train_weights=None):
     es = callbacks.EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=30)
 
-    if train_weights != None:
-        history = autoencoder.fit(train_input,train_target,sample_weight=train_weights,epochs=n_epochs,batch_size=500,shuffle=True,validation_data=(val_input,val_input),callbacks=[es])
-    else:
-        history = autoencoder.fit(train_input,train_target,epochs=n_epochs,batch_size=500,shuffle=True,validation_data=(val_input,val_input),callbacks=[es])
+    history = autoencoder.fit(train_input,train_target,sample_weight=train_weights,epochs=n_epochs,batch_size=500,shuffle=True,validation_data=(val_input,val_input),callbacks=[es])
 
     plot_loss(history,name)
 
@@ -668,6 +665,8 @@ def main(args):
 
         val_max = maxdata[val_ind]
         val_sum = sumdata[val_ind]
+	
+	train_sum = sumdata[train_ind]
         if args.occReweight:
             train_weights = np.multiply(weights_maxQ[train_ind], weights_occ[train_ind])
         else:
@@ -694,7 +693,7 @@ def main(args):
                                 train_input,train_input,val_input,
                                 name=model_name,
                                 n_epochs = args.epochs,
-                                )
+				train_weights = np.square(train_sum))
         else:
             if args.retrain: # retrain w input weights
                 history = train(m_autoCNN,m_autoCNNen,
