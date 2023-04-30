@@ -13,19 +13,12 @@ import os
 import pandas as pd
 
 def load_data(inputFile):
-    data=pd.read_csv(inputFile,usecols=[*range(0,48)])
+    data=pd.read_csv(inputFile,usecols=[*range(0,48)],header=None)
     data_values=data.values
             
     return data_values
 
-def load_phy(inputFile):
-    data=pd.read_csv(inputFile,usecols=[*range(48,49)])
-    data_values=data.values
-            
-    return data_values
-
-
-def plot_eta(current_dir,models,phys):
+def plot_eta(current_dir,models,eta):
     
     fig,ax=plt.subplots()
     plt.figure(figsize=(6,4))
@@ -33,16 +26,10 @@ def plot_eta(current_dir,models,phys):
     model_0=model_list[0]
     
     #Calculate offset for better presentation
-    indices_00 = range(0,(len(phys)))
+    indices = range(0,(len(eta)))
     
-    eta_00=[]
-                  
-    for i in indices_00:
-        eta_00=np.append(eta_00,phys[i][0])
-    
-    offset=0.75*((np.max(eta_00)-np.min(eta_00))/10)/(len(model_list))
+    offset=0.75*((np.max(eta)-np.min(eta))/10)/(len(model_list))
                        
-    
     for im,model in enumerate(models.split(',')):
         if model==model_0:continue
         input_dir=os.path.join(current_dir,model,'verify_input_calQ.csv')
@@ -50,15 +37,8 @@ def plot_eta(current_dir,models,phys):
         
         input_Q=load_data(input_dir)
         output_Q=load_data(output_dir)
-        
-        indices = range(0,(len(input_Q)))
-        
         emd_values = np.array([emd(input_Q[i],output_Q[j]) for i, j in zip(indices,indices)])
-    
-        eta=[]
-        for i in indices:
-            eta=np.append(eta,phys[i][0])
-            
+        
         x=eta
         y=emd_values
         
@@ -87,16 +67,9 @@ def plot_eta(current_dir,models,phys):
         
     input_Q_0=load_data(input_dir_0)
     output_Q_0=load_data(output_dir_0)
+    emd_values_0 = np.array([emd(input_Q_0[i],output_Q_0[j]) for i, j in zip(indices,indices)])
     
-    indices_0 = range(0,(len(input_Q_0)))
-        
-    emd_values_0 = np.array([emd(input_Q_0[i],output_Q_0[j]) for i, j in zip(indices_0,indices_0)])
-    
-    eta_0=[]
-    for i in indices_0:
-        eta_0=np.append(eta_0,phys[i][0])
-        
-    x=eta_0
+    x=eta
     y=emd_values_0
         
     nbins=10
@@ -119,5 +92,5 @@ def plot_eta(current_dir,models,phys):
     plt.legend(loc='upper right')
     plt.xlabel(r'$\eta$')
     plt.ylabel('EMD')
-    plt.savefig(current_dir+'/ae_comp_eta_EMD',dpi=600)   
+    plt.savefig(current_dir+'/ae_comp_eta_EMD.pdf',dpi=600)   
  

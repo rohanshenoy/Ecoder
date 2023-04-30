@@ -54,10 +54,6 @@ parser.add_argument("--double", action='store_true', default = False,dest="doubl
                     help="test PU400 by combining PU200 events")
 parser.add_argument("--overrideInput", action='store_true', default = False,dest="overrideInput",
                     help="disable safety check on inputs")
-
-parser.add_argument("--saveAll", action='store_true', default = False, dest="saveAll",
-                    help="save training and validation wafers ")
-
 parser.add_argument("--nCSV", type=int, default = 1, dest="nCSV",
                     help="n of validation wafers to write to csv")
 parser.add_argument("--maxVal", type=int, default = -1, dest="maxVal",
@@ -122,10 +118,6 @@ def load_data(args):
     # charge data headers of 48 Input Trigger Cells (TC) 
     CALQ_COLS = ['CALQ_%i'%c for c in range(0, 48)]
     
-    #Keep track of phys data
-    COORD_COLS=['tc_eta','tc_phi']
-    data={}
-    phys={}
     def mask_data(data,args):
         # mask rows where occupancy is zero
         mask_occupancy = (data[CALQ_COLS].astype('float64').sum(axis=1) != 0)
@@ -143,21 +135,11 @@ def load_data(args):
                 _logger.warning('No SimEnergyFraction array in input data')
         return data
     
-    if os.path.isdir(args.inputFile):
-        df_arr = []
-        phy_arr=[]
-        for infile in os.listdir(args.inputFile):
-            if os.path.isdir(args.inputFile+infile): continue
-            infile = os.path.join(args.inputFile,infile)
-            if args.noHeader:
-                df_arr.append(pd.read_csv(infile, dtype=np.float64, header=0, nrows = args.nrowsPerFile, usecols= CALQ_COLS))
-                phy_arr.append(pd.read_csv(infile, dtype=np.float64, header=0, nrows = args.nrowsPerFile,usecols=COORD_COLS))
-            else:
-                df_arr.append(pd.read_csv(infile, nrows=args.nrowsPerFile))
-        data = pd.concat(df_arr)
-        phys = pd.concat(phy_arr)
-    else:
-        data = pd.read_csv(args.inputFile, nrows=args.nrowsPerFile)
+    infile = args.inputFile
+            
+    data = pd.read_csv(infile, dtype=np.float64, header=0, nrows = args.nrowsPerFile, usecols= CALQ_COLS)
+    eta_values = pd.read_csv(infile, dtype=np.float64, header=0, nrows = args.nrowsPerFile,usecols=['tc_eta']).values
+    
     data = mask_data(data,args)
 
     if args.saveEnergy:
@@ -172,9 +154,7 @@ def load_data(args):
             _logger.warning('No SimEnergyFraction or SimEnergyTotal or EventSimEnergyTotal arrays in input data')
 
     data = data[CALQ_COLS].astype('float64')
-    phys = phys[COORD_COLS]
     data_values = data.values
-    phys_values = phys.values
     _logger.info('Input data shape')
     print(data.shape)
     data.describe()
@@ -192,8 +172,7 @@ def load_data(args):
         _logger.info('Duplicated the data, the new shape is:')
         print(doubled_data.shape)
         data_values = doubled_data
-
-    return (data_values,phys_values)
+    return (data_values,eta_values.flatten())
 
 def build_model(args):
     # import network architecture and loss function
@@ -554,7 +533,7 @@ def main(args):
             exit(0)
 
     # load data
-    data_values,phys_values = load_data(args)
+    data_values,eta_values = load_data(args)
         
     # measure TC occupancy
     occupancy_all = np.count_nonzero(data_values,axis=1) # measure non-zero TCs (should be all)
@@ -601,15 +580,15 @@ def main(args):
         'metrics'     :{'EMD':emd},
         "occ_nbins"   :12,
         "occ_range"   :(0,24),
-	"occ_bins"    : [0,2,5,10,15],
-	"chg_nbins"   :20,
+        "occ_bins"    : [0,2,5,10,15],
+        "chg_nbins"   :20,
         "chg_range"   :(0,200),
         "chglog_nbins":20,
         "chglog_range":(0,2.5),
         "chg_bins"    :[0,2,5,10,50],
         "occTitle"    :r"occupancy [1 MIP$_{\mathrm{T}}$ TCs]"       ,
         "logMaxTitle" :r"log10(Max TC charge/MIP$_{\mathrm{T}}$)",
-	"logTotTitle" :r"log10(Sum of TC charges/MIP$_{\mathrm{T}}$)",
+        "logTotTitle" :r"log10(Sum of TC charges/MIP$_{\mathrm{T}}$)",
     }
     if args.full:
         eval_dict['metrics'].update({'EMD':emd,
@@ -637,10 +616,12 @@ def main(args):
     # performance dictionary
     perf_dict={}
     
-    #Putting back validation wafer physics columns below once training is done
-    Nphys = round(len(phys_values)*0.2)
-    phys_val_input = phys_values[:Nphys]
-    phys_val_input=phys_val_input
+    #Common eta values for all trainings
+    
+    val_input_eta, train_input_eta, val_ind_eta, train_ind_eta = split(data_values)
+    
+    train_eta = eta_values[train_ind_eta]
+    val_eta = eta_values[val_ind_eta]
     
     # train each model
     for model in models:
@@ -678,7 +659,9 @@ def main(args):
 
         val_max = maxdata[val_ind]
         val_sum = sumdata[val_ind]
-	train_sum = sumdata[train_ind]
+        
+        train_sum = sumdata[train_ind]
+
         if args.occReweight:
             train_weights = np.multiply(weights_maxQ[train_ind], weights_occ[train_ind])
         else:
@@ -705,7 +688,6 @@ def main(args):
                                 train_input,train_input,val_input,
                                 name=model_name,
                                 n_epochs = args.epochs,
-				train_weights = np.square(train_sum)
                                 )
         else:
             if args.retrain: # retrain w input weights
@@ -739,26 +721,10 @@ def main(args):
             AEvol = m.pams['shape'][0]* m.pams['shape'][1] *  m.pams['shape'][2]
             np.savetxt("verify_input_ae.csv", input_Q[0:N_csv].reshape(N_csv,AEvol), delimiter=",",fmt='%.12f')
             np.savetxt("verify_input_ae_abs.csv", input_Q_abs[0:N_csv].reshape(N_csv,AEvol), delimiter=",",fmt='%.12f')
-            np.savetxt("verify_input_calQ.csv", np.hstack((input_calQ[0:N_csv].reshape(N_csv,48),phys_val_input)), delimiter=",",fmt='%.12f')
+            np.savetxt("verify_input_calQ.csv", input_calQ[0:N_csv].reshape(N_csv,48), delimiter=",",fmt='%.12f')
             np.savetxt("verify_output.csv",cnn_enQ[0:N_csv].reshape(N_csv,m.pams['encoded_dim']), delimiter=",",fmt='%.12f')
             np.savetxt("verify_decoded.csv",cnn_deQ[0:N_csv].reshape(N_csv,AEvol), delimiter=",",fmt='%.12f')
-            np.savetxt("verify_decoded_calQ.csv",np.hstack((output_calQ_fr[0:N_csv].reshape(N_csv,48),phys_val_input)), delimiter=",",fmt='%.12f')
-            
-        if args.saveAll:
-            N_wafers = args.nrowsPerFile
-            _logger.info('Save all wafers, model %s'%model_name)
-            all_input_Q, all_cnn_deQ, all_cnn_enQ = m.predict(shaped_data)
-
-            all_input_calQ  = m.mapToCalQ(all_input_Q)   # shape = (N,48) in CALQ order
-            all_output_calQ_fr = m.mapToCalQ(all_cnn_deQ)# shape = (N,48) in CALQ order
-
-            _logger.info('Restore normalization')
-            all_input_Q_abs = np.array([all_input_Q[i]*(maxdata[i] if args.rescaleInputToMax else sumdata[i]) for i in range(0,len(all_input_Q))]) * 35.   # restore abs input in CALQ unit                              
-            all_input_calQ  = np.array([all_input_calQ[i]*(maxdata[i] if args.rescaleInputToMax else sumdata[i]) for i in range(0,len(all_input_calQ)) ])  # shape = (N,48) in CALQ order                                
-            all_output_calQ = unnormalize(all_output_calQ_fr.copy(), maxdata if args.rescaleOutputToMax else sumdata, rescaleOutputToMax=args.rescaleOutputToMax)
-            #Save  all wafers with physics columns       
-            np.savetxt("all_input_calQ.csv", np.hstack((all_input_calQ[0:N_wafers].reshape(N_wafers,48),phys_values)), delimiter=",",fmt='%.12f')
-            np.savetxt("all_decoded_calQ.csv",np.hstack((all_output_calQ_fr[0:N_wafers].reshape(N_wafers,48),phys_values)), delimiter=",",fmt='%.12f')
+            np.savetxt("verify_decoded_calQ.csv",output_calQ_fr[0:N_csv].reshape(N_csv,48), delimiter=",",fmt='%.12f')
                 
 
         _logger.info('Renormalize inputs of AE for comparisons')
@@ -789,8 +755,7 @@ def main(args):
     compare_models(models,perf_dict,eval_dict,args)
     
     os.chdir(orig_dir)
-    
-    plot_eta(args.odir,args.models,phys_val_input)
+    plot_eta(args.odir,args.models,val_eta)
 
 
 if __name__ == '__main__':
